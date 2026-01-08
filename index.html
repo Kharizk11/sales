@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة المبيعات - SAP Fiori Style</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0a6ed1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="نظام المبيعات">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Fonts: Using Arial/Helvetica as SAP 72 fallback -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/sap-theme.css">
+    <!-- <link rel="stylesheet" href="css/home-enhanced.css"> -->
+
+
+    <!-- Firebase Scripts (Load First) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <!-- Config (Load Before Data) -->
+    <script src="js/core/config.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- SAP Shell Header -->
+        <header class="shell-header">
+            <button class="btn-sap btn-transparent" onclick="toggleSidebar()" style="color: white; margin-left: 10px;">
+                ☰
+            </button>
+            <div class="shell-logo">
+                <span style="font-size: 1.2rem;">📊</span>
+                <span>نظام المبيعات</span>
+            </div>
+            <div class="shell-actions">
+                <button class="btn-sap btn-transparent" style="color: white;" onclick="updateDashboard()">
+                    🔄 تحديث
+                </button>
+                <button class="btn-sap btn-transparent" style="color: white;">
+                    👤 المدير
+                </button>
+            </div>
+        </header>
+
+        <div class="app-body">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <nav class="nav-links">
+                    <div class="nav-item active" onclick="navigateTo('home')">
+                        <span class="nav-icon">🏠</span>
+                        <span>الرئيسية</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('sales')">
+                        <span class="nav-icon">💰</span>
+                        <span>تسجيل المبيعات</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('branches')">
+                        <span class="nav-icon">🏢</span>
+                        <span>الفروع</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('analytics')">
+                        <span class="nav-icon">📊</span>
+                        <span>التقارير والتحليلات</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('reconciliation')">
+                        <span class="nav-icon">⚖️</span>
+                        <span>تسوية الصندوق</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('settings')">
+                        <span class="nav-icon">⚙️</span>
+                        <span>الإعدادات</span>
+                    </div>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+
+                <!-- HOME SECTION (Launchpad) -->
+                <div id="home-section" class="page-section">
+                    <h2 style="margin-bottom: 1.5rem; color: var(--sap-text-primary);">لوحة التحكم</h2>
+
+                    <!-- Launchpad Tiles Grid -->
+                    <div class="tile-grid">
+                        <!-- Sales Tile -->
+                        <div class="sap-tile" onclick="navigateTo('sales')">
+                            <div class="sap-tile-title">تسجيل المبيعات</div>
+                            <div class="sap-tile-content">
+                                <div class="sap-tile-number">+</div>
+                                <div class="sap-tile-info">عملية جديدة</div>
+                            </div>
+                            <div class="sap-tile-icon">💰</div>
+                        </div>
+
+                        <!-- Today's Sales Stat -->
+                        <div class="sap-tile">
+                            <div class="sap-tile-title">مبيعات اليوم</div>
+                            <div class="sap-tile-content">
+                                <div class="sap-tile-number" id="statToday">
+                                    <span class="loading-skeleton" style="font-size: 1.5rem;">...</span>
+                                </div>
+                                <div class="sap-tile-info" id="statTodayTrend">--</div>
+                            </div>
+                            <div class="sap-tile-icon">📈</div>
+                        </div>
+
+                        <!-- Month Sales Stat -->
+                        <div class="sap-tile">
+                            <div class="sap-tile-title">مبيعات الشهر</div>
+                            <div class="sap-tile-content">
+                                <div class="sap-tile-number" id="statMonth">
+                                    <span class="loading-skeleton" style="font-size: 1.5rem;">...</span>
+                                </div>
+                                <div class="sap-tile-info" id="statMonthTrend">--</div>
+                            </div>
+                            <div class="sap-tile-icon">📅</div>
+                        </div>
+
+                        <!-- Branches Stat -->
+                        <div class="sap-tile" onclick="navigateTo('branches')">
+                            <div class="sap-tile-title">الفروع النشطة</div>
+                            <div class="sap-tile-content">
+                                <div class="sap-tile-number" id="statBranches">
+                                    <span class="loading-skeleton" style="font-size: 1.5rem;">...</span>
+                                </div>
+                                <div class="sap-tile-info">إدارة الفروع</div>
+                            </div>
+                            <div class="sap-tile-icon">🏢</div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                        <div class="sap-card">
+                            <div class="sap-card-header">
+                                <h3 class="sap-card-title">تحليل المبيعات (7 أيام)</h3>
+                            </div>
+                            <div class="sap-card-content" style="height: 300px; position: relative;">
+                                <canvas id="dailySalesChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="sap-card">
+                            <div class="sap-card-header">
+                                <h3 class="sap-card-title">توزيع الفروع</h3>
+                            </div>
+                            <div class="sap-card-content" style="height: 300px; position: relative;">
+                                <canvas id="branchesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Sales Table -->
+                    <div class="sap-card">
+                        <div class="sap-card-header">
+                            <h3 class="sap-card-title">آخر العمليات المسجلة</h3>
+                            <button class="btn-sap btn-transparent" onclick="navigateTo('sales')">عرض الكل</button>
+                        </div>
+                        <div class="sap-card-content" style="padding: 0;">
+                            <div style="overflow-x: auto;">
+                                <table class="sap-table" id="recentSalesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>التاريخ</th>
+                                            <th>الفرع</th>
+                                            <th>الوصف</th>
+                                            <th>المبلغ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentSalesBody">
+                                        <tr>
+                                            <td colspan="5" style="text-align: center; padding: 2rem;">جاري التحميل...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SALES SECTION -->
+                <div id="sales-section" class="page-section" style="display: none;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 style="margin: 0;">تسجيل المبيعات</h2>
+                        <button class="btn-sap btn-standard" onclick="toggleSalesTable()" id="toggleSalesBtn">📋 عرض
+                            السجل</button>
+                    </div>
+
+                    <div class="sap-card">
+                        <div class="sap-card-header">
+                            <h3 class="sap-card-title">بيانات العملية</h3>
+                        </div>
+                        <div class="sap-card-content">
+                            <form id="cleanSalesForm" onsubmit="handleCleanSubmit(event)">
+                                <input type="hidden" id="saleId">
+
+                                <div
+                                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                                    <div class="sap-input-group">
+                                        <label class="sap-label">التاريخ</label>
+                                        <input type="date" id="saleDate" class="sap-input" required>
+                                    </div>
+                                    <div class="sap-input-group">
+                                        <label class="sap-label">الفرع</label>
+                                        <select id="saleBranch" class="sap-input" required>
+                                            <option value="">اختر الفرع...</option>
+                                        </select>
+                                    </div>
+                                    <div class="sap-input-group">
+                                        <label class="sap-label">المبلغ (ريال)</label>
+                                        <input type="number" id="saleAmount" class="sap-input" step="0.01" min="0"
+                                            placeholder="0.00" required>
+                                    </div>
+                                </div>
+
+                                <div class="sap-input-group">
+                                    <label class="sap-label">الوصف / البيان</label>
+                                    <input type="text" id="saleDescription" class="sap-input"
+                                        placeholder="مثال: إيراد الفترة الصباحية">
+                                </div>
+
+                                <div class="sap-input-group">
+                                    <label class="sap-label">ملاحظات</label>
+                                    <textarea id="saleNotes" class="sap-input" rows="3"
+                                        style="height: auto; padding-top: 0.5rem;"></textarea>
+                                </div>
+
+                                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                                    <button type="button" class="btn-sap btn-standard"
+                                        onclick="resetCleanForm()">تفريغ</button>
+                                    <button type="submit" class="btn-sap btn-emphasized">حفظ العملية</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Sales List -->
+                    <div id="salesListSection" style="display: none; margin-top: 2rem;">
+                        <div class="sap-card">
+                            <div class="sap-card-header">
+                                <h3 class="sap-card-title">سجل العمليات</h3>
+                                <input type="text" id="searchSales" class="sap-input" placeholder="بحث..."
+                                    style="width: 200px;">
+                            </div>
+                            <div class="sap-card-content" style="padding: 0;">
+                                <div style="overflow-x: auto;">
+                                    <table class="sap-table" id="salesTable">
+                                        <thead>
+                                            <tr>
+                                                <th>التاريخ</th>
+                                                <th>الفرع</th>
+                                                <th>الوصف</th>
+                                                <th>المبلغ</th>
+                                                <th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="salesTableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BRANCHES SECTION -->
+                <div id="branches-section" class="page-section" style="display: none;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 style="margin: 0;">إدارة الفروع</h2>
+                        <button class="btn-sap btn-emphasized" onclick="openBranchModal()">➕ إضافة فرع</button>
+                    </div>
+
+                    <!-- Branch Stats Tiles -->
+                    <div class="tile-grid">
+                        <div class="sap-tile">
+                            <div class="sap-tile-title">إجمالي الفروع</div>
+                            <div class="sap-tile-content">
+                                <div class="sap-tile-number" id="totalBranches">--</div>
+                            </div>
+                            <div class="sap-tile-icon">🏢</div>
+                        </div>
+                        <div class="sap-tile">
+                            <div class="sap-tile-title">إجمالي المبيعات</div>
+                            <div class="sap-tile-content">
+                                <div class="sap-tile-number" id="totalBranchesSales" title="إجمالي المبيعات">--</div>
+                            </div>
+                            <div class="sap-tile-icon">💰</div>
+                        </div>
+                        <div class="sap-tile">
+                            <div class="sap-tile-title">أفضل فرع</div>
+                            <div class="sap-tile-content">
+                                <div class="sap-tile-number" id="topBranchName" style="font-size: 1.5rem;">--</div>
+                            </div>
+                            <div class="sap-tile-icon">🏆</div>
+                        </div>
+                    </div>
+
+                    <div class="sap-card">
+                        <div class="sap-card-header">
+                            <h3 class="sap-card-title">قائمة الفروع</h3>
+                            <input type="text" id="branchSearch" class="sap-input" placeholder="بحث في الفروع..."
+                                style="width: 250px;" oninput="filterBranches()">
+                        </div>
+                        <div class="sap-card-content" style="padding: 0;">
+                            <div style="overflow-x: auto;">
+                                <table class="sap-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>اسم الفرع</th>
+                                            <th>عدد المبيعات</th>
+                                            <th>إجمالي المبيعات</th>
+                                            <th>الأداء</th>
+                                            <th>إجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="branchesBody">
+                                        <tr>
+                                            <td colspan="7" style="text-align: center; padding: 2rem;">جاري التحميل...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RECONCILIATION SECTION -->
+                <div id="reconciliation-section" class="page-section" style="display: none;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 style="margin: 0;">تسوية الصندوق اليومية</h2>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn-sap btn-standard" onclick="openPOSManagement()">🏪 إدارة نقاط
+                                البيع</button>
+                            <button class="btn-sap btn-standard" onclick="openCashierManagement()">👤 إدارة
+                                الكاشير</button>
+                            <button class="btn-sap btn-emphasized" onclick="showReconciliationForm()">➕ تسوية
+                                جديدة</button>
+                        </div>
+                    </div>
+
+                    <!-- POS Management (Hidden by default) -->
+                    <div id="posManagementSection" style="display: none; margin-bottom: 1.5rem;">
+                        <div class="sap-card">
+                            <div class="sap-card-header">
+                                <h3 class="sap-card-title">إدارة نقاط البيع</h3>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn-sap btn-emphasized" onclick="openPOSModal()">➕ إضافة نقطة
+                                        بيع</button>
+                                    <button class="btn-sap btn-transparent" onclick="hidePOSManagement()">✖</button>
+                                </div>
+                            </div>
+                            <div class="sap-card-content">
+                                <div style="overflow-x: auto;">
+                                    <table class="sap-table">
+                                        <thead>
+                                            <tr>
+                                                <th>اسم نقطة البيع</th>
+                                                <th>الكاشير المرتبط</th>
+                                                <th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="posTableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cashier Management (Hidden by default) -->
+                    <div id="cashierManagementSection" style="display: none; margin-bottom: 1.5rem;">
+                        <div class="sap-card">
+                            <div class="sap-card-header">
+                                <h3 class="sap-card-title">إدارة الكاشير</h3>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn-sap btn-emphasized" onclick="openCashierModal()">➕ إضافة
+                                        كاشير</button>
+                                    <button class="btn-sap btn-transparent" onclick="hideCashierManagement()">✖</button>
+                                </div>
+                            </div>
+                            <div class="sap-card-content">
+                                <div style="overflow-x: auto;">
+                                    <table class="sap-table">
+                                        <thead>
+                                            <tr>
+                                                <th>اسم الكاشير</th>
+                                                <th>رقم الهاتف</th>
+                                                <th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="cashierTableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reconciliation Form (Hidden by default) -->
+                    <div id="reconciliationFormSection" style="display: none; margin-bottom: 1.5rem;">
+                        <div class="sap-card">
+                            <div class="sap-card-header">
+                                <h3 class="sap-card-title" id="recFormTitle">تسوية جديدة</h3>
+                                <button class="btn-sap btn-transparent" onclick="hideReconciliationForm()">✖</button>
+                            </div>
+                            <div class="sap-card-content">
+                                <form id="reconciliationForm" onsubmit="handleRecSubmit(event)">
+                                    <input type="hidden" id="recId">
+                                    <div
+                                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                                        <div class="sap-input-group">
+                                            <label class="sap-label">التاريخ</label>
+                                            <input type="date" id="recDate" class="sap-input" required>
+                                        </div>
+                                        <div class="sap-input-group">
+                                            <label class="sap-label">نقطة البيع</label>
+                                            <select id="recPos" class="sap-input" required>
+                                                <option value="">اختر نقطة البيع...</option>
+                                            </select>
+                                        </div>
+                                        <div class="sap-input-group">
+                                            <label class="sap-label">الكاشير</label>
+                                            <select id="recCashier" class="sap-input" required>
+                                                <option value="">اختر الكاشير...</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                                        <div class="sap-input-group">
+                                            <label class="sap-label">المبيعات (النظام)</label>
+                                            <input type="number" id="recSales" class="sap-input" step="0.01" value="0"
+                                                oninput="calculateRec()">
+                                        </div>
+                                        <div class="sap-input-group">
+                                            <label class="sap-label">مرتجع المبيعات</label>
+                                            <input type="number" id="recReturns" class="sap-input" step="0.01" value="0"
+                                                oninput="calculateRec()">
+                                        </div>
+                                        <div class="sap-input-group">
+                                            <label class="sap-label">مبيعات مدى</label>
+                                            <input type="number" id="recMada" class="sap-input" step="0.01" value="0"
+                                                oninput="calculateRec()">
+                                        </div>
+                                        <div class="sap-input-group">
+                                            <label class="sap-label">مبيعات فيزا</label>
+                                            <input type="number" id="recVisa" class="sap-input" step="0.01" value="0"
+                                                oninput="calculateRec()">
+                                        </div>
+                                        <div class="sap-input-group">
+                                            <label class="sap-label">النقدية المسلمة</label>
+                                            <input type="number" id="recCashHanded" class="sap-input" step="0.01"
+                                                value="0" oninput="calculateRec()">
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; background: var(--sap-bg-hover); padding: 1rem; border-radius: 4px;">
+                                        <div class="sap-input-group">
+                                            <label class="sap-label">إجمالي المبيعات</label>
+                                            <div id="resTotalSales" style="font-weight: bold; font-size: 1.2rem;">0.00
+                                            </div>
+                                        </div>
+                                        <div class="sap-input-group">
+                                            <label class="sap-label">إجمالي الشبكة (مدى + فيزا)</label>
+                                            <div id="resTotalNetwork" style="font-weight: bold; font-size: 1.2rem;">0.00
+                                            </div>
+                                        </div>
+                                        <div class="sap-input-group">
+                                            <label class="sap-label">صافي المبيعات (النقدية المتوقعة)</label>
+                                            <div id="resNetSales" style="font-weight: bold; font-size: 1.2rem;">0.00
+                                            </div>
+                                        </div>
+                                        <div class="sap-input-group">
+                                            <label class="sap-label">الفرق (زيادة / عجز)</label>
+                                            <div id="resDifference" style="font-weight: bold; font-size: 1.2rem;">0.00
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="sap-input-group">
+                                        <label class="sap-label">ملاحظات</label>
+                                        <textarea id="recNotes" class="sap-input" rows="2"></textarea>
+                                    </div>
+
+                                    <div
+                                        style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+                                        <button type="button" class="btn-sap btn-standard"
+                                            onclick="hideReconciliationForm()">إلغاء</button>
+                                        <button type="submit" class="btn-sap btn-emphasized">حفظ التسوية</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reconciliation History -->
+                    <div class="sap-card">
+                        <div class="sap-card-header">
+                            <h3 class="sap-card-title">سجل التسويات</h3>
+                            <input type="text" id="searchRec" class="sap-input" placeholder="بحث..."
+                                style="width: 200px;">
+                        </div>
+                        <div class="sap-card-content" style="padding: 0;">
+                            <div style="overflow-x: auto;">
+                                <table class="sap-table" id="recTable">
+                                    <thead>
+                                        <tr>
+                                            <th>التاريخ</th>
+                                            <th>نقطة البيع</th>
+                                            <th>الكاشير</th>
+                                            <th>صافي المبيعات</th>
+                                            <th>النقدية المسلمة</th>
+                                            <th>الفرق</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ANALYTICS SECTION -->
+                <div id="analytics-section" class="page-section" style="display: none;">
+                    <h2 style="margin-bottom: 1.5rem;">التقارير والتحليلات</h2>
+
+                    <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                        <!-- Sidebar Selection -->
+                        <div class="sap-card" style="width: 250px; height: fit-content;">
+                            <div class="sap-card-header">
+                                <h3 class="sap-card-title">نوع التقرير</h3>
+                            </div>
+                            <div class="sap-card-content" style="padding: 0.5rem;">
+                                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                    <button class="btn-sap btn-standard"
+                                        style="justify-content: flex-start; width: 100%; border: none;"
+                                        onclick="switchReport('daily')">📅 التقرير اليومي</button>
+                                    <button class="btn-sap btn-standard"
+                                        style="justify-content: flex-start; width: 100%; border: none;"
+                                        onclick="switchReport('monthly')">📈 التقرير الشهري</button>
+                                    <button class="btn-sap btn-standard"
+                                        style="justify-content: flex-start; width: 100%; border: none;"
+                                        onclick="switchReport('custom')">🔍 تقرير مخصص</button>
+                                    <button class="btn-sap btn-standard"
+                                        style="justify-content: flex-start; width: 100%; border: none;"
+                                        onclick="switchReport('branches')">🏢 أداء الفروع</button>
+                                    <button class="btn-sap btn-standard"
+                                        style="justify-content: flex-start; width: 100%; border: none;"
+                                        onclick="switchReport('matrix')">📊 مصفوفة المبيعات</button>
+                                    <button class="btn-sap btn-emphasized"
+                                        style="justify-content: flex-start; width: 100%; margin-top: 0.5rem;"
+                                        onclick="switchReport('ai')">🤖 تحليل ذكي</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Display Area -->
+                        <div class="sap-card" id="reportDisplayArea" style="flex: 1; min-height: 500px;">
+                            <div
+                                style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--sap-text-secondary); padding: 3rem;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+                                <h3>اختر نوع التقرير للعرض</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- POS Modal -->
+    <div id="posModalOverlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;">
+        <div class="sap-card" style="width: 400px; max-width: 90%; margin: 0;">
+            <div class="sap-card-header">
+                <h3 class="sap-card-title" id="posModalTitle">إضافة نقطة بيع</h3>
+                <button onclick="closePOSModal()"
+                    style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div class="sap-card-content">
+                <form id="posForm" onsubmit="handlePOSSubmit(event)">
+                    <input type="hidden" id="posId">
+                    <div class="sap-input-group">
+                        <label class="sap-label">اسم نقطة البيع *</label>
+                        <input type="text" id="posName" class="sap-input" required placeholder="مثال: كاشير 1">
+                    </div>
+                    <div class="sap-input-group">
+                        <label class="sap-label">اسم الكاشير المرتبط</label>
+                        <input type="text" id="posCashier" class="sap-input" placeholder="اسم الموظف">
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                        <button type="button" class="btn-sap btn-standard" onclick="closePOSModal()">إلغاء</button>
+                        <button type="submit" class="btn-sap btn-emphasized">حفظ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cashier Modal -->
+    <div id="cashierModalOverlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;">
+        <div class="sap-card" style="width: 400px; max-width: 90%; margin: 0;">
+            <div class="sap-card-header">
+                <h3 class="sap-card-title" id="cashierModalTitle">إضافة كاشير</h3>
+                <button onclick="closeCashierModal()"
+                    style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div class="sap-card-content">
+                <form id="cashierForm" onsubmit="handleCashierSubmit(event)">
+                    <input type="hidden" id="cashierId">
+                    <div class="sap-input-group">
+                        <label class="sap-label">اسم الكاشير *</label>
+                        <input type="text" id="cashierName" class="sap-input" required placeholder="اسم الموظف">
+                    </div>
+                    <div class="sap-input-group">
+                        <label class="sap-label">رقم الهاتف</label>
+                        <input type="text" id="cashierPhone" class="sap-input" placeholder="05xxxxxxxx">
+                    </div>
+                    <div class="sap-input-group">
+                        <label class="sap-label">ملاحظات</label>
+                        <textarea id="cashierNotes" class="sap-input" rows="2"></textarea>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                        <button type="button" class="btn-sap btn-standard" onclick="closeCashierModal()">إلغاء</button>
+                        <button type="submit" class="btn-sap btn-emphasized">حفظ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Branch Modal -->
+    <div id="branchModalOverlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;">
+        <div class="sap-card" style="width: 400px; max-width: 90%; margin: 0;">
+            <div class="sap-card-header">
+                <h3 class="sap-card-title" id="branchModalTitle">إضافة فرع جديد</h3>
+                <button onclick="closeBranchModal()"
+                    style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div class="sap-card-content">
+                <form id="branchForm" onsubmit="handleBranchSubmit(event)">
+                    <input type="hidden" id="branchId">
+                    <div class="sap-input-group">
+                        <label class="sap-label">اسم الفرع *</label>
+                        <input type="text" id="branchName" class="sap-input" required placeholder="مثال: فرع الرياض">
+                    </div>
+                    <div class="sap-input-group">
+                        <label class="sap-label">الوصف</label>
+                        <textarea id="branchDescription" class="sap-input" rows="3"></textarea>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                        <button type="button" class="btn-sap btn-standard" onclick="closeBranchModal()">إلغاء</button>
+                        <button type="submit" class="btn-sap btn-emphasized">حفظ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Frame -->
+    <iframe id="printFrame" style="display:none"></iframe>
+
+    <!-- SheetJS -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+    <!-- Core Scripts -->
+    <script src="js/core/data.js"></script>
+    <script src="js/core/utils.js"></script>
+    <script src="js/core/excel-handler.js"></script>
+    <script src="js/pages/home.js"></script>
+    <script src="js/pages/clean-sales.js"></script>
+    <script src="js/pages/branches.js"></script>
+    <script src="js/pages/analytics.js"></script>
+    <script src="js/pages/ai-analytics.js"></script>
+    <script src="js/pages/pos-reconciliation.js"></script>
+    <script src="js/pages/print-reports.js"></script>
+    <script src="js/pages/settings.js"></script>
+
+    <script>
+        // Router Logic
+        function navigateTo(pageId) {
+            // Hide all sections
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.style.display = 'none';
+            });
+
+            // Show target section
+            const targetSection = document.getElementById(`${pageId}-section`);
+            if (targetSection) {
+                targetSection.style.display = 'block';
+            }
+
+            // Update Sidebar Active State
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(`'${pageId}'`)) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Page specific init
+            if (pageId === 'home') {
+                if (typeof updateDashboard === 'function') updateDashboard();
+            } else if (pageId === 'sales') {
+                if (typeof loadBranches === 'function') loadBranches();
+                const dateInput = document.getElementById('saleDate');
+                if (dateInput && !dateInput.value) dateInput.valueAsDate = new Date();
+            } else if (pageId === 'branches') {
+                if (typeof renderBranchesTable === 'function') renderBranchesTable();
+            } else if (pageId === 'reconciliation') {
+                if (typeof initRecPage === 'function') initRecPage();
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.querySelector('.main-content');
+
+            if (sidebar.style.transform === 'translateX(100%)' || getComputedStyle(sidebar).transform === 'matrix(1, 0, 0, 1, 240, 0)') {
+                // It's hidden (RTL positive translate), show it
+                sidebar.style.transform = 'translateX(0)';
+                if (window.innerWidth > 992) mainContent.style.marginRight = '240px';
+            } else {
+                // It's shown, hide it
+                sidebar.style.transform = 'translateX(100%)'; // Move right to hide in RTL
+                mainContent.style.marginRight = '0';
+            }
+        }
+
+        // Initial Load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                navigateTo('home');
+            }, 500);
+
+            // Register Service Worker
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js')
+                        .then(reg => console.log('Service Worker registered', reg))
+                        .catch(err => console.error('Service Worker registration failed', err));
+                });
+            }
+        });
+    </script>
+
+    <!-- Footer -->
+    <div class="sap-footer">
+        <div class="sap-footer-left">
+            <span id="footerDate"></span>
+            <span style="margin: 0 5px;">|</span>
+            <span id="footerTime"></span>
+        </div>
+        <div class="sap-footer-right">
+            Designed by Khaled Rizk 0538611816
+        </div>
+    </div>
+
+</body>
+
+</html>
