@@ -1,0 +1,164 @@
+<div class="main-content">
+    <div class="page-header">
+        <h1 class="page-title" id="pageTitle">➕ إضافة مستخدم جديد</h1>
+        <div class="page-actions">
+            <button class="btn btn-outline" onclick="goBack()">
+                ← رجوع
+            </button>
+        </div>
+    </div>
+
+    <div class="card" style="max-width: 900px; margin: 0 auto;">
+        <div class="card-header">
+            <h2 class="card-title" id="formTitle">معلومات المستخدم</h2>
+        </div>
+        <div class="card-body">
+            <form id="userForm" onsubmit="handleUserSubmit(event)">
+                <input type="hidden" id="userId">
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-lg);">
+                    <!-- Basic Information Section -->
+                    <div>
+                        <h3 style="color: var(--primary); margin-bottom: var(--spacing-md); padding-bottom: var(--spacing-sm); border-bottom: 2px solid var(--primary-light);">
+                            📝 المعلومات الأساسية
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="userUsername">اسم المستخدم *</label>
+                            <input type="text" id="userUsername" required placeholder="أدخل اسم المستخدم" autocomplete="username">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="userPassword" id="userPasswordLabel">كلمة المرور *</label>
+                            <input type="password" id="userPassword" placeholder="أدخل كلمة المرور" autocomplete="new-password">
+                            <small style="color: var(--text-muted); font-size: 0.85em; display: block; margin-top: var(--spacing-xs);" id="passwordHint">
+                                (للتعديل: اتركه فارغاً للحفاظ على كلمة المرور الحالية)
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="userName">الاسم الكامل *</label>
+                            <input type="text" id="userName" required placeholder="أدخل الاسم الكامل">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="userEmail">البريد الإلكتروني</label>
+                            <input type="email" id="userEmail" placeholder="example@email.com" autocomplete="email">
+                        </div>
+                    </div>
+                    
+                    <!-- Role & Branch Section -->
+                    <div>
+                        <h3 style="color: var(--primary); margin-bottom: var(--spacing-md); padding-bottom: var(--spacing-sm); border-bottom: 2px solid var(--primary-light);">
+                            🔐 الصلاحيات والفرع
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="userRole">الصلاحية *</label>
+                            <select id="userRole" required onchange="updatePermissionsUI()">
+                                <option value="user">👤 مستخدم</option>
+                                <option value="admin">🔑 مدير</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="userBranch">الفرع</label>
+                            <select id="userBranch">
+                                <option value="">بدون فرع (جميع الفروع)</option>
+                            </select>
+                            <small style="color: var(--text-muted); font-size: 0.85em; display: block; margin-top: var(--spacing-xs);">
+                                اختر فرع محدد للمستخدم أو اتركه فارغاً للوصول لجميع الفروع
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer;">
+                                <input type="checkbox" id="userIsActive" checked style="width: 20px; height: 20px; cursor: pointer;">
+                                <span style="font-weight: 500;">المستخدم نشط</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Permissions Section -->
+                <div style="margin-top: var(--spacing-xl); padding-top: var(--spacing-lg); border-top: 2px solid var(--border-light);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md);">
+                        <h3 style="color: var(--primary); margin: 0;">
+                            🔐 الصلاحيات المخصصة
+                        </h3>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="resetPermissionsToDefault()">
+                            🔄 إعادة تعيين للافتراضي
+                        </button>
+                    </div>
+                    
+                    <div id="permissionsContainer" style="background: var(--bg-secondary); padding: var(--spacing-lg); border-radius: var(--radius-md); border: 1px solid var(--border);">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-md);">
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer; padding: var(--spacing-sm); border-radius: var(--radius-sm); transition: background var(--transition);" 
+                                   onmouseover="this.style.background='var(--hover)'" 
+                                   onmouseout="this.style.background='transparent'">
+                                <input type="checkbox" id="permAddSales" class="permission-checkbox" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span style="font-weight: 500;">➕ إضافة مبيعات</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer; padding: var(--spacing-sm); border-radius: var(--radius-sm); transition: background var(--transition);" 
+                                   onmouseover="this.style.background='var(--hover)'" 
+                                   onmouseout="this.style.background='transparent'">
+                                <input type="checkbox" id="permEditSales" class="permission-checkbox" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span style="font-weight: 500;">✏️ تعديل مبيعات</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer; padding: var(--spacing-sm); border-radius: var(--radius-sm); transition: background var(--transition);" 
+                                   onmouseover="this.style.background='var(--hover)'" 
+                                   onmouseout="this.style.background='transparent'">
+                                <input type="checkbox" id="permDeleteSales" class="permission-checkbox" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span style="font-weight: 500;">🗑️ حذف مبيعات</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer; padding: var(--spacing-sm); border-radius: var(--radius-sm); transition: background var(--transition);" 
+                                   onmouseover="this.style.background='var(--hover)'" 
+                                   onmouseout="this.style.background='transparent'">
+                                <input type="checkbox" id="permViewReports" class="permission-checkbox" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span style="font-weight: 500;">📊 عرض التقارير</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer; padding: var(--spacing-sm); border-radius: var(--radius-sm); transition: background var(--transition);" 
+                                   onmouseover="this.style.background='var(--hover)'" 
+                                   onmouseout="this.style.background='transparent'">
+                                <input type="checkbox" id="permExportReports" class="permission-checkbox" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span style="font-weight: 500;">📥 تصدير التقارير</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer; padding: var(--spacing-sm); border-radius: var(--radius-sm); transition: background var(--transition);" 
+                                   onmouseover="this.style.background='var(--hover)'" 
+                                   onmouseout="this.style.background='transparent'">
+                                <input type="checkbox" id="permManageBranches" class="permission-checkbox" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span style="font-weight: 500;">🏢 إدارة الفروع</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer; padding: var(--spacing-sm); border-radius: var(--radius-sm); transition: background var(--transition);" 
+                                   onmouseover="this.style.background='var(--hover)'" 
+                                   onmouseout="this.style.background='transparent'">
+                                <input type="checkbox" id="permManageUsers" class="permission-checkbox" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span style="font-weight: 500;">👥 إدارة المستخدمين</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: var(--spacing-sm); cursor: pointer; padding: var(--spacing-sm); border-radius: var(--radius-sm); transition: background var(--transition);" 
+                                   onmouseover="this.style.background='var(--hover)'" 
+                                   onmouseout="this.style.background='transparent'">
+                                <input type="checkbox" id="permViewAllBranches" class="permission-checkbox" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span style="font-weight: 500;">👁️ عرض جميع الفروع</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form Actions -->
+                <div style="margin-top: var(--spacing-xl); padding-top: var(--spacing-lg); border-top: 2px solid var(--border-light); display: flex; gap: var(--spacing-md); justify-content: flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="goBack()">
+                        إلغاء
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        💾 حفظ المستخدم
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+

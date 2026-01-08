@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نموذج المبيعات المتقدم</title>
+    <link rel="stylesheet" href="../css/modern-design.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        body {
+            padding: var(--spacing-2xl);
+        }
+
+        .form-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--spacing-lg);
+        }
+
+        #searchResults {
+            display: none;
+            margin-top: var(--spacing-md);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        #cartItems {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 1024px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <!-- Header -->
+        <header class="text-center mb-4 animate-fadeIn">
+            <h1 class="gradient-text"
+                style="font-size: var(--font-size-4xl); font-family: var(--font-display); margin-bottom: var(--spacing-sm);">
+                💰 نموذج المبيعات المتقدم
+            </h1>
+            <p style="font-size: var(--font-size-lg); color: var(--text-secondary);">
+                نظام ذكي مع سلة تسوق وتحقق فوري من البيانات
+            </p>
+        </header>
+
+        <form id="advancedSalesForm" onsubmit="advancedSalesForm.submitForm(event)">
+            <div class="form-grid">
+                <!-- Left Column - Form Fields -->
+                <div class="animate-slideInRight">
+                    <!-- Basic Info Card -->
+                    <div class="glass-card mb-3">
+                        <h3 class="gradient-text mb-3" style="font-size: var(--font-size-xl);">
+                            📋 المعلومات الأساسية
+                        </h3>
+
+                        <div
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-md);">
+                            <div class="form-group-modern">
+                                <input type="date" class="form-input-modern" placeholder=" " id="saleDate" required>
+                                <label for="saleDate" class="form-label-modern">📅 التاريخ</label>
+                                <div id="dateFeedback"></div>
+                            </div>
+
+                            <div class="form-group-modern">
+                                <select class="form-input-modern" id="saleBranch" required style="padding-top: 1rem;">
+                                    <option value="">اختر الفرع</option>
+                                    <option value="الرياض">🏢 الرياض</option>
+                                    <option value="جدة">🏢 جدة</option>
+                                    <option value="الدمام">🏢 الدمام</option>
+                                    <option value="مكة">🏢 مكة</option>
+                                </select>
+                                <label for="saleBranch" class="form-label-modern">🏢 الفرع</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Product Search Card -->
+                    <div class="glass-card mb-3">
+                        <h3 class="gradient-text mb-3" style="font-size: var(--font-size-xl);">
+                            🔍 البحث عن المنتجات
+                        </h3>
+
+                        <div class="form-group-modern">
+                            <input type="text" class="form-input-modern" placeholder=" " id="productSearch"
+                                autocomplete="off">
+                            <label for="productSearch" class="form-label-modern">🔍 ابحث عن منتج...</label>
+                        </div>
+
+                        <div id="searchResults"></div>
+                    </div>
+
+                    <!-- Smart Suggestions -->
+                    <div id="smartSuggestions" class="mb-3"></div>
+
+                    <!-- Notes Card -->
+                    <div class="glass-card">
+                        <h3 class="gradient-text mb-3" style="font-size: var(--font-size-xl);">
+                            📝 ملاحظات إضافية
+                        </h3>
+
+                        <div class="form-group-modern">
+                            <textarea class="form-input-modern" placeholder=" " id="saleNotes" rows="4"
+                                style="resize: vertical;"></textarea>
+                            <label for="saleNotes" class="form-label-modern">📝 ملاحظات</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Shopping Cart -->
+                <div class="animate-fadeIn">
+                    <div class="glass-card" style="position: sticky; top: var(--spacing-lg);">
+                        <h3 class="gradient-text mb-3" style="font-size: var(--font-size-xl);">
+                            🛒 سلة المشتريات
+                        </h3>
+
+                        <div id="cartItems">
+                            <div class="text-center" style="padding: var(--spacing-lg); color: var(--text-muted);">
+                                🛒 السلة فارغة
+                            </div>
+                        </div>
+
+                        <!-- Total -->
+                        <div
+                            style="margin-top: var(--spacing-lg); padding-top: var(--spacing-lg); border-top: 2px solid var(--glass-border);">
+                            <div class="flex justify-between items-center mb-3">
+                                <span style="font-size: var(--font-size-lg); font-weight: 600;">الإجمالي:</span>
+                                <span class="gradient-text" style="font-size: var(--font-size-3xl); font-weight: 700;">
+                                    <span id="cartTotal">0.00</span> ريال
+                                </span>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex gap-2" style="flex-direction: column;">
+                                <button type="submit" class="btn-modern btn-primary"
+                                    style="width: 100%; justify-content: center;">
+                                    <span>💾</span>
+                                    <span>حفظ المبيعات</span>
+                                </button>
+
+                                <button type="button" class="btn-modern btn-glass"
+                                    style="width: 100%; justify-content: center;"
+                                    onclick="advancedSalesForm.resetForm()">
+                                    <span>🔄</span>
+                                    <span>إعادة تعيين</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden input for cart data -->
+            <input type="hidden" id="cartData" name="cartData">
+        </form>
+
+        <!-- Stats Cards -->
+        <div
+            style="margin-top: var(--spacing-2xl); display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg);">
+            <div class="glass-card text-center stagger-item">
+                <div
+                    style="font-size: var(--font-size-sm); color: var(--text-muted); margin-bottom: var(--spacing-sm);">
+                    📊 مبيعات اليوم
+                </div>
+                <div class="gradient-text" style="font-size: var(--font-size-2xl); font-weight: 700;">
+                    15
+                </div>
+                <div
+                    style="font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: var(--spacing-xs);">
+                    عملية
+                </div>
+            </div>
+
+            <div class="glass-card text-center stagger-item">
+                <div
+                    style="font-size: var(--font-size-sm); color: var(--text-muted); margin-bottom: var(--spacing-sm);">
+                    💰 إجمالي اليوم
+                </div>
+                <div class="gradient-text" style="font-size: var(--font-size-2xl); font-weight: 700;">
+                    12,450
+                </div>
+                <div
+                    style="font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: var(--spacing-xs);">
+                    ريال
+                </div>
+            </div>
+
+            <div class="glass-card text-center stagger-item">
+                <div
+                    style="font-size: var(--font-size-sm); color: var(--text-muted); margin-bottom: var(--spacing-sm);">
+                    📈 متوسط العملية
+                </div>
+                <div class="gradient-text" style="font-size: var(--font-size-2xl); font-weight: 700;">
+                    830
+                </div>
+                <div
+                    style="font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: var(--spacing-xs);">
+                    ريال
+                </div>
+            </div>
+
+            <div class="glass-card text-center stagger-item">
+                <div
+                    style="font-size: var(--font-size-sm); color: var(--text-muted); margin-bottom: var(--spacing-sm);">
+                    🎯 الهدف الشهري
+                </div>
+                <div class="gradient-text" style="font-size: var(--font-size-2xl); font-weight: 700;">
+                    68%
+                </div>
+                <div
+                    style="font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: var(--spacing-xs);">
+                    مكتمل
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" style="position: fixed; top: 20px; left: 20px; z-index: 10000;"></div>
+
+    <!-- Scripts -->
+    <script src="../js/core/utils.js"></script>
+    <script src="../js/pages/advanced-sales-form.js"></script>
+
+    <script>
+        // Set default date to today
+        document.getElementById('saleDate').valueAsDate = new Date();
+    </script>
+</body>
+
+</html>

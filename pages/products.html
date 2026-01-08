@@ -1,0 +1,811 @@
+<!-- Advanced Products Management Page -->
+<div class="page-container">
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">📦 إدارة المنتجات</h1>
+            <p class="page-subtitle">نظام متكامل لإدارة المنتجات والمخزون</p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            <button class="btn-secondary" onclick="refreshProducts()" title="تحديث">
+                🔄 تحديث
+            </button>
+            <button class="btn-primary" onclick="openProductModal()">
+                ➕ منتج جديد
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card" style="background: linear-gradient(135deg, #818cf8, #6366f1);">
+            <div class="stat-icon">📦</div>
+            <div class="stat-label">إجمالي المنتجات</div>
+            <div class="stat-value" id="totalProducts">0</div>
+            <div class="stat-change" id="productsChange">+0 هذا الشهر</div>
+        </div>
+
+        <div class="stat-card" style="background: linear-gradient(135deg, #34d399, #10b981);">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">منتجات نشطة</div>
+            <div class="stat-value" id="activeProducts">0</div>
+            <div class="stat-change" id="activePercentage">0%</div>
+        </div>
+
+        <div class="stat-card" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-label">مخزون منخفض</div>
+            <div class="stat-value" id="lowStockProducts">0</div>
+        </div>
+
+        <div class="stat-card" style="background: linear-gradient(135deg, #60a5fa, #3b82f6);">
+            <div class="stat-icon">🏷️</div>
+            <div class="stat-label">التصنيفات</div>
+            <div class="stat-value" id="totalCategories">0</div>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 بحث بالكود، الاسم، الباركود..." 
+                    oninput="filterProducts()">
+            </div>
+
+            <select id="categoryFilter" class="filter-select" onchange="filterProducts()">
+                <option value="">كل التصنيفات</option>
+            </select>
+
+            <select id="statusFilter" class="filter-select" onchange="filterProducts()">
+                <option value="">كل الحالات</option>
+                <option value="active">نشط</option>
+                <option value="inactive">غير نشط</option>
+            </select>
+
+            <select id="stockFilter" class="filter-select" onchange="filterProducts()">
+                <option value="">كل المخزون</option>
+                <option value="in-stock">متوفر</option>
+                <option value="low-stock">منخفض</option>
+                <option value="out-of-stock">نفذ</option>
+            </select>
+        </div>
+
+        <div class="toolbar-section">
+            <select id="sortBy" class="filter-select" onchange="sortProducts()">
+                <option value="name-asc">الاسم (أ-ي)</option>
+                <option value="name-desc">الاسم (ي-أ)</option>
+                <option value="price-asc">السعر (الأقل)</option>
+                <option value="price-desc">السعر (الأعلى)</option>
+                <option value="stock-asc">المخزون (الأقل)</option>
+                <option value="stock-desc">المخزون (الأعلى)</option>
+                <option value="date-new">الأحدث</option>
+                <option value="date-old">الأقدم</option>
+            </select>
+
+            <button class="btn-icon" onclick="toggleViewMode()" title="تبديل العرض">
+                <span id="viewModeIcon">📋</span>
+            </button>
+
+            <label class="btn-icon" title="استيراد من Excel">
+                📥
+                <input type="file" accept=".xlsx,.xls" onchange="handleImport(event)" style="display: none;">
+            </label>
+
+            <button class="btn-icon" onclick="exportToExcel()" title="تصدير إلى Excel">
+                📤
+            </button>
+        </div>
+    </div>
+
+    <!-- Bulk Actions Bar -->
+    <div id="bulkActionsBar" class="bulk-actions-bar" style="display: none;">
+        <div>
+            <strong id="selectedCount">0</strong> منتج محدد
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <button class="btn-secondary btn-sm" onclick="bulkChangeStatus('active')">
+                ✅ تفعيل
+            </button>
+            <button class="btn-secondary btn-sm" onclick="bulkChangeStatus('inactive')">
+                ⛔ إيقاف
+            </button>
+            <button class="btn-danger btn-sm" onclick="bulkDelete()">
+                🗑️ حذف
+            </button>
+            <button class="btn-secondary btn-sm" onclick="selectedProducts.clear(); updateBulkActions(); renderProducts()">
+                ✖️ إلغاء
+            </button>
+        </div>
+    </div>
+
+    <!-- Products Container -->
+    <div id="productsContainer" class="products-table-view"></div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-icon">📦</div>
+        <h3>لا توجد منتجات</h3>
+        <p>ابدأ بإضافة منتج جديد أو استيراد منتجات من Excel</p>
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
+            <button class="btn-primary" onclick="openProductModal()">
+                ➕ منتج جديد
+            </button>
+            <label class="btn-secondary">
+                📥 استيراد من Excel
+                <input type="file" accept=".xlsx,.xls" onchange="handleImport(event)" style="display: none;">
+            </label>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div id="paginationContainer" class="pagination-container" style="display: none;">
+        <div class="pagination-info">
+            عرض <strong id="showingFrom">1</strong> - <strong id="showingTo">10</strong> من <strong id="totalItems">0</strong>
+        </div>
+        <div id="paginationButtons" class="pagination-buttons"></div>
+        <div>
+            <select id="pageSize" class="filter-select" onchange="changePageSize()">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- Product Modal -->
+<div id="productModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h2 id="modalTitle">منتج جديد</h2>
+            <button class="modal-close" onclick="closeProductModal()">✖️</button>
+        </div>
+        <form id="productForm" onsubmit="saveProduct(event)">
+            <div class="modal-body">
+                <div class="form-grid">
+                    <!-- Basic Info -->
+                    <div class="form-section">
+                        <h3>المعلومات الأساسية</h3>
+                        <div class="form-group">
+                            <label>كود المنتج <span class="required">*</span></label>
+                            <input type="text" id="productCode" required placeholder="مثال: P001">
+                        </div>
+                        <div class="form-group">
+                            <label>اسم المنتج <span class="required">*</span></label>
+                            <input type="text" id="productName" required placeholder="مثال: قلم أزرق">
+                        </div>
+                        <div class="form-group">
+                            <label>الوصف</label>
+                            <textarea id="productDescription" rows="3" placeholder="وصف المنتج..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Classification -->
+                    <div class="form-section">
+                        <h3>التصنيف</h3>
+                        <div class="form-group">
+                            <label>التصنيف</label>
+                            <input type="text" id="productCategory" list="categoriesList" placeholder="مثال: قرطاسية">
+                            <datalist id="categoriesList"></datalist>
+                        </div>
+                        <div class="form-group">
+                            <label>الوحدة <span class="required">*</span></label>
+                            <input type="text" id="productUnit" required placeholder="مثال: حبة، كرتون، كيلو">
+                        </div>
+                        <div class="form-group">
+                            <label>الباركود</label>
+                            <input type="text" id="productBarcode" placeholder="رقم الباركود">
+                        </div>
+                    </div>
+
+                    <!-- Pricing -->
+                    <div class="form-section">
+                        <h3>التسعير</h3>
+                        <div class="form-group">
+                            <label>التكلفة</label>
+                            <input type="number" id="productCost" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>السعر <span class="required">*</span></label>
+                            <input type="number" id="productPrice" step="0.01" min="0" required placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <!-- Inventory -->
+                    <div class="form-section">
+                        <h3>المخزون</h3>
+                        <div class="form-group">
+                            <label>الكمية الحالية <span class="required">*</span></label>
+                            <input type="number" id="productStock" min="0" required placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label>الحد الأدنى</label>
+                            <input type="number" id="productMinStock" min="0" placeholder="10">
+                        </div>
+                        <div class="form-group">
+                            <label>الحالة</label>
+                            <select id="productStatus">
+                                <option value="active">نشط</option>
+                                <option value="inactive">غير نشط</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeProductModal()">إلغاء</button>
+                <button type="submit" class="btn-primary">💾 حفظ</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Quick View Modal -->
+<div id="quickViewModal" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+            <h2>عرض سريع</h2>
+            <button class="modal-close" onclick="closeQuickView()">✖️</button>
+        </div>
+        <div class="modal-body" id="quickViewContent"></div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeQuickView()">إغلاق</button>
+            <button class="btn-primary" onclick="editFromQuickView()">✏️ تعديل</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Page Container */
+.page-container {
+    padding: 2rem;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+/* Page Header */
+.page-header {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 2rem;
+    color: #1e293b;
+}
+
+.page-subtitle {
+    margin: 0.5rem 0 0 0;
+    color: #64748b;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    padding: 1.5rem;
+    border-radius: 12px;
+    color: white;
+}
+
+.stat-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0.25rem 0;
+}
+
+.stat-change {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+/* Toolbar */
+.toolbar {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.toolbar-section {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.search-box {
+    flex: 1;
+    min-width: 250px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.filter-select {
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+.btn-icon {
+    padding: 0.75rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.25rem;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    background: #f8fafc;
+    border-color: #6366f1;
+}
+
+/* Bulk Actions Bar */
+.bulk-actions-bar {
+    background: #6366f1;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+/* Products Table */
+.products-table-view {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.products-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.products-table thead {
+    background: #f8fafc;
+}
+
+.products-table th {
+    padding: 1rem;
+    text-align: right;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.products-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.products-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+/* Products Grid */
+.products-grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.product-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.product-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.product-code {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: #f1f5f9;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.product-name {
+    margin: 0.5rem 0;
+    font-size: 1.25rem;
+    color: #1e293b;
+}
+
+.product-category {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+
+.product-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #6366f1;
+    margin: 0.5rem 0;
+}
+
+.product-stock {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin: 0.75rem 0;
+}
+
+.product-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Stock Status */
+.stock-ok {
+    color: #059669;
+    font-weight: 600;
+}
+
+.stock-low {
+    color: #f59e0b;
+    font-weight: 600;
+}
+
+.stock-out {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+/* Empty State */
+.empty-state {
+    background: white;
+    border-radius: 12px;
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 5rem;
+    opacity: 0.5;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    color: #1e293b;
+}
+
+.empty-state p {
+    color: #64748b;
+    margin-bottom: 1.5rem;
+}
+
+/* Pagination */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pagination-info {
+    color: #64748b;
+}
+
+.pagination-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.page-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e2e8f0;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #6366f1;
+}
+
+.page-btn.active {
+    background: #6366f1;
+    color: white;
+    border-color: #6366f1;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    max-height: 90vh;
+    overflow-y: auto;
+    width: 100%;
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #1e293b;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #64748b;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+/* Form */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-section h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    color: #1e293b;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.875rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #6366f1;
+}
+
+.required {
+    color: #dc2626;
+}
+
+/* Buttons */
+.btn-primary {
+    padding: 0.75rem 1.5rem;
+    background: #6366f1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: #4f46e5;
+}
+
+.btn-secondary {
+    padding: 0.75rem 1.5rem;
+    background: white;
+    color: #6366f1;
+    border: 1px solid #6366f1;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background: #f8fafc;
+}
+
+.btn-danger {
+    padding: 0.75rem 1.5rem;
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+}
+
+.btn-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.checkbox-modern {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-container {
+        padding: 1rem;
+    }
+
+    .page-header {
+        padding: 1.5rem;
+    }
+
+    .toolbar {
+        padding: 1rem;
+    }
+
+    .toolbar-section {
+        width: 100%;
+    }
+
+    .search-box {
+        width: 100%;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script src="../js/pages/products.js"></script>
+<script>
+// Initialize when page loads
+if (typeof initProductsPage === 'function') {
+    initProductsPage();
+}
+</script>

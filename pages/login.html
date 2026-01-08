@@ -1,0 +1,48 @@
+<div class="main-content">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">
+                    <span style="font-size: 3em;">📊</span>
+                    <h1>نظام إدارة المبيعات</h1>
+                    <p style="color: var(--text-muted); margin-top: var(--spacing-sm);">تسجيل الدخول</p>
+                </div>
+            </div>
+            <div class="login-body">
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="username">اسم المستخدم</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            required 
+                            autocomplete="username"
+                            placeholder="أدخل اسم المستخدم"
+                            autofocus
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="password">كلمة المرور</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            required 
+                            autocomplete="current-password"
+                            placeholder="أدخل كلمة المرور"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-block" id="loginBtn">
+                            🔐 تسجيل الدخول
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+

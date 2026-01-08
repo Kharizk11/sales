@@ -1,0 +1,125 @@
+<div class="main-content">
+    <!-- Header -->
+    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h2 style="margin: 0; color: var(--primary-dark);">تسجيل المبيعات</h2>
+            <p style="color: var(--secondary-color); margin-top: 5px;">إدخال مباشر وسريع للمبيعات اليومية</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-clean btn-secondary-clean" onclick="toggleSalesTable()" id="toggleSalesBtn">
+                📋 عرض السجل
+            </button>
+        </div>
+    </header>
+
+    <!-- Clean Sales Form -->
+    <div class="clean-card animate-fadeIn">
+        <form id="cleanSalesForm" onsubmit="handleCleanSubmit(event)">
+            <input type="hidden" id="saleId">
+
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                <!-- Date -->
+                <div class="form-group-clean">
+                    <label for="saleDate" class="form-label-clean">التاريخ</label>
+                    <input type="date" id="saleDate" class="form-input-clean" required>
+                </div>
+
+                <!-- Branch -->
+                <div class="form-group-clean">
+                    <label for="saleBranch" class="form-label-clean">الفرع</label>
+                    <select id="saleBranch" class="form-input-clean" required>
+                        <option value="">اختر الفرع...</option>
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <!-- Amount -->
+                <div class="form-group-clean">
+                    <label for="saleAmount" class="form-label-clean">المبلغ (ريال)</label>
+                    <input type="number" id="saleAmount" class="form-input-clean" step="0.01" min="0" placeholder="0.00"
+                        required>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 30px;">
+                <!-- Description -->
+                <div class="form-group-clean">
+                    <label for="saleDescription" class="form-label-clean">الوصف / البيان</label>
+                    <input type="text" id="saleDescription" class="form-input-clean"
+                        placeholder="مثال: إيراد الفترة الصباحية" autocomplete="off">
+                </div>
+
+                <!-- Notes -->
+                <div class="form-group-clean">
+                    <label for="saleNotes" class="form-label-clean">ملاحظات إضافية</label>
+                    <textarea id="saleNotes" class="form-input-clean" rows="3"
+                        placeholder="أي تفاصيل إضافية..."></textarea>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div
+                style="display: flex; justify-content: flex-end; gap: 15px; border-top: 1px solid #f0f0f0; padding-top: 20px;">
+                <button type="button" class="btn-clean btn-secondary-clean" onclick="resetCleanForm()">
+                    🗑️ تفريغ
+                </button>
+                <button type="submit" class="btn-clean btn-primary-clean" style="min-width: 150px;">
+                    💾 حفظ العملية
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Sales List (Hidden by default) -->
+    <div id="salesListSection" style="display: none; margin-top: 30px;">
+        <div class="clean-card">
+            <div class="card-header-clean">
+                <h3 class="card-title-clean">سجل العمليات الأخيرة</h3>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="searchSales" class="form-input-clean" placeholder="🔍 بحث..."
+                        style="padding: 8px 12px; width: 200px;">
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="clean-table" id="salesTable">
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>الفرع</th>
+                            <th>الوصف</th>
+                            <th>المبلغ</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize date to today
+    document.getElementById('saleDate').valueAsDate = new Date();
+
+    // Load branches immediately
+    if (typeof loadBranches === 'function') loadBranches();
+
+    // Toggle list visibility
+    function toggleSalesTable() {
+        const section = document.getElementById('salesListSection');
+        const btn = document.getElementById('toggleSalesBtn');
+
+        if (section.style.display === 'none') {
+            section.style.display = 'block';
+            btn.style.backgroundColor = '#E0E5F2'; // Active state simulation
+            if (typeof loadSalesTable === 'function') loadSalesTable();
+        } else {
+            section.style.display = 'none';
+            btn.style.backgroundColor = '';
+        }
+    }
+</script>

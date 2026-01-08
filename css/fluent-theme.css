@@ -1,0 +1,571 @@
+/* ===================================
+   Microsoft Fluent Design Theme
+   Design: Modern, Light, Depth, Motion
+   =================================== */
+
+:root {
+    /* --- Palette: Microsoft Fluent --- */
+    --fluent-primary: #0078D4;
+    /* Microsoft Blue */
+    --fluent-primary-dark: #005A9E;
+    --fluent-primary-light: #DEECF9;
+
+    --fluent-bg-app: #F3F3F3;
+    /* Light Gray App Background */
+    --fluent-bg-surface: #FFFFFF;
+    /* White Content Surface */
+    --fluent-bg-hover: #F8F8F8;
+
+    --fluent-text-primary: #242424;
+    --fluent-text-secondary: #616161;
+    --fluent-text-disabled: #BDBDBD;
+
+    --fluent-border: #E0E0E0;
+    --fluent-border-input: #8A8886;
+
+    /* --- Status Colors --- */
+    --fluent-success: #107C10;
+    --fluent-warning: #D83B01;
+    --fluent-danger: #C50F1F;
+    --fluent-info: #0078D4;
+
+    /* --- Shadows (Elevation) --- */
+    --fluent-shadow-card: 0 2px 4px rgba(0, 0, 0, 0.04);
+    --fluent-shadow-hover: 0 4px 8px rgba(0, 0, 0, 0.08);
+    --fluent-shadow-flyout: 0 8px 16px rgba(0, 0, 0, 0.14);
+
+    /* --- Radius --- */
+    --fluent-radius-sm: 4px;
+    /* Controls */
+    --fluent-radius-md: 8px;
+    /* Cards/Overlays */
+    --fluent-radius-lg: 12px;
+    /* Modals */
+
+    /* --- Spacing --- */
+    --fluent-space-xs: 4px;
+    --fluent-space-sm: 8px;
+    --fluent-space-md: 16px;
+    --fluent-space-lg: 24px;
+    --fluent-space-xl: 32px;
+
+    /* --- Typography --- */
+    --font-family-base: 'Segoe UI', 'Tajawal', sans-serif;
+}
+
+/* ===================================
+   Reset & Base
+   =================================== */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--fluent-bg-app);
+    color: var(--fluent-text-primary);
+    font-family: var(--font-family-base);
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+    font-size: 14px;
+    overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--fluent-text-primary);
+}
+
+a {
+    text-decoration: none;
+    color: var(--fluent-primary);
+    transition: 0.2s;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ===================================
+   Layout: Navigation Pane (Sidebar)
+   =================================== */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.sidebar {
+    width: 260px;
+    background: var(--fluent-bg-surface);
+    color: var(--fluent-text-primary);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    right: 0;
+    /* RTL */
+    height: 100vh;
+    z-index: 100;
+    border-left: 1px solid var(--fluent-border);
+    /* RTL Border */
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-header {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 60px;
+}
+
+.sidebar-logo {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--fluent-text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-links {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 8px;
+}
+
+.nav-section-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--fluent-text-secondary);
+    padding: 16px 12px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    color: var(--fluent-text-primary);
+    font-weight: 400;
+    transition: all 0.1s;
+    gap: 12px;
+    font-size: 0.95rem;
+    border-radius: var(--fluent-radius-sm);
+    margin-bottom: 2px;
+    cursor: pointer;
+    position: relative;
+}
+
+.nav-item:hover {
+    background-color: var(--fluent-bg-hover);
+}
+
+.nav-item.active {
+    background-color: var(--fluent-primary-light);
+    color: var(--fluent-primary);
+    font-weight: 600;
+}
+
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    /* RTL */
+    top: 50%;
+    transform: translateY(-50%);
+    height: 16px;
+    width: 3px;
+    background-color: var(--fluent-primary);
+    border-radius: 2px;
+}
+
+.nav-icon {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+    color: var(--fluent-text-secondary);
+}
+
+.nav-item.active .nav-icon {
+    color: var(--fluent-primary);
+}
+
+/* ===================================
+   Main Content Area
+   =================================== */
+.main-content {
+    flex: 1;
+    margin-right: 260px;
+    /* RTL Sidebar width */
+    padding: 24px 32px;
+    background-color: var(--fluent-bg-app);
+    min-height: 100vh;
+    width: calc(100% - 260px);
+    transition: margin-right 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===================================
+   Components: Cards
+   =================================== */
+.fluent-card {
+    background: var(--fluent-bg-surface);
+    border: 1px solid var(--fluent-border);
+    border-radius: var(--fluent-radius-md);
+    padding: 20px;
+    box-shadow: var(--fluent-shadow-card);
+    margin-bottom: 20px;
+    transition: box-shadow 0.2s;
+}
+
+.fluent-card:hover {
+    box-shadow: var(--fluent-shadow-hover);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--fluent-text-primary);
+    margin: 0;
+}
+
+/* ===================================
+   Components: Buttons
+   =================================== */
+.btn-fluent {
+    padding: 6px 20px;
+    border-radius: var(--fluent-radius-sm);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.1s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 32px;
+}
+
+.btn-primary {
+    background: var(--fluent-primary);
+    color: white;
+    border-color: var(--fluent-primary);
+}
+
+.btn-primary:hover {
+    background: var(--fluent-primary-dark);
+    border-color: var(--fluent-primary-dark);
+}
+
+.btn-standard {
+    background: var(--fluent-bg-surface);
+    color: var(--fluent-text-primary);
+    border-color: var(--fluent-border);
+}
+
+.btn-standard:hover {
+    background: var(--fluent-bg-hover);
+    border-color: #C7C7C7;
+}
+
+.btn-subtle {
+    background: transparent;
+    color: var(--fluent-text-primary);
+}
+
+.btn-subtle:hover {
+    background: var(--fluent-bg-hover);
+}
+
+/* ===================================
+   Components: Inputs
+   =================================== */
+.fluent-input {
+    width: 100%;
+    padding: 7px 12px;
+    border: 1px solid var(--fluent-border-input);
+    border-radius: var(--fluent-radius-sm);
+    font-size: 0.95rem;
+    color: var(--fluent-text-primary);
+    background: var(--fluent-bg-surface);
+    transition: all 0.1s;
+}
+
+.fluent-input:hover {
+    border-color: #323130;
+}
+
+.fluent-input:focus {
+    border-color: var(--fluent-primary);
+    border-bottom-width: 2px;
+    outline: none;
+    padding-bottom: 6px;
+    /* Adjust for border width change */
+}
+
+/* ===================================
+   Components: Tables (Details List)
+   =================================== */
+.fluent-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.fluent-table th {
+    text-align: right;
+    /* RTL */
+    padding: 12px 16px;
+    color: var(--fluent-text-secondary);
+    font-weight: 600;
+    border-bottom: 1px solid var(--fluent-border);
+    background-color: var(--fluent-bg-surface);
+}
+
+.fluent-table td {
+    padding: 12px 16px;
+    color: var(--fluent-text-primary);
+    border-bottom: 1px solid var(--fluent-border);
+    vertical-align: middle;
+}
+
+.fluent-table tbody tr:hover {
+    background-color: var(--fluent-bg-hover);
+}
+
+/* ===================================
+   Responsive & Collapsed Sidebar
+   =================================== */
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(100%);
+        /* Hide RTL */
+    }
+
+    .main-content {
+        margin-right: 0;
+        width: 100%;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+}
+
+@media (min-width: 993px) {
+    .sidebar.collapsed {
+        width: 60px;
+    }
+
+    .sidebar.collapsed .sidebar-logo span,
+    .sidebar.collapsed .nav-section-title,
+    .sidebar.collapsed .nav-item span:last-child {
+        display: none;
+    }
+
+    .sidebar.collapsed .nav-item {
+        justify-content: center;
+        padding: 10px 0;
+    }
+
+    .sidebar.collapsed .nav-icon {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+
+    .main-content.expanded {
+        margin-right: 60px;
+        width: calc(100% - 60px);
+    }
+}
+
+/* ===================================
+   Backward Compatibility Layer
+   =================================== */
+:root {
+    /* Map Odoo variables to Fluent variables */
+    --primary-color: var(--fluent-primary);
+    --primary-dark: var(--fluent-primary-dark);
+    --primary-light: var(--fluent-primary-light);
+    --secondary-color: var(--fluent-text-secondary);
+    --success-color: var(--fluent-success);
+    --danger-color: var(--fluent-danger);
+    --warning-color: var(--fluent-warning);
+    --info-color: var(--fluent-info);
+
+    --bg-light: var(--fluent-bg-app);
+    --bg-white: var(--fluent-bg-surface);
+    --text-color: var(--fluent-text-primary);
+    --text-muted: var(--fluent-text-secondary);
+    --border-color: var(--fluent-border);
+
+    /* Generic aliases */
+    --primary: var(--fluent-primary);
+    --secondary: var(--fluent-text-secondary);
+    --success: var(--fluent-success);
+    --danger: var(--fluent-danger);
+    --warning: var(--fluent-warning);
+    --info: var(--fluent-info);
+}
+
+/* Utility Classes Compatibility */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 16px;
+    border-radius: var(--fluent-radius-sm);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.1s;
+    gap: 8px;
+}
+
+.btn-primary {
+    background-color: var(--fluent-primary);
+    color: white;
+    border-color: var(--fluent-primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--fluent-primary-dark);
+}
+
+.btn-success {
+    background-color: var(--fluent-success);
+    color: white;
+    border-color: var(--fluent-success);
+}
+
+.btn-success:hover {
+    background-color: #0E6A0E;
+}
+
+.btn-danger {
+    background-color: var(--fluent-danger);
+    color: white;
+    border-color: var(--fluent-danger);
+}
+
+.btn-danger:hover {
+    background-color: #A80000;
+}
+
+.btn-warning {
+    background-color: var(--fluent-warning);
+    color: white;
+    border-color: var(--fluent-warning);
+}
+
+.btn-info {
+    background-color: var(--fluent-info);
+    color: white;
+    border-color: var(--fluent-info);
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 1px solid var(--fluent-border);
+    color: var(--fluent-text-primary);
+}
+
+.btn-outline:hover {
+    background-color: var(--fluent-bg-hover);
+}
+
+.btn-sm {
+    padding: 4px 12px;
+    font-size: 0.85rem;
+}
+
+/* Odoo Clean Classes Mapping */
+.btn-clean {
+    padding: 6px 16px;
+    border-radius: var(--fluent-radius-sm);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.1s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-primary-clean {
+    background-color: var(--fluent-primary);
+    color: white;
+}
+
+.btn-primary-clean:hover {
+    background-color: var(--fluent-primary-dark);
+}
+
+.btn-secondary-clean {
+    background-color: var(--fluent-bg-surface);
+    border: 1px solid var(--fluent-border);
+    color: var(--fluent-text-primary);
+}
+
+.btn-secondary-clean:hover {
+    background-color: var(--fluent-bg-hover);
+    border-color: var(--fluent-border-input);
+}
+
+.form-input-clean {
+    width: 100%;
+    padding: 7px 12px;
+    border: 1px solid var(--fluent-border-input);
+    border-radius: var(--fluent-radius-sm);
+    font-size: 0.95rem;
+    color: var(--fluent-text-primary);
+    background: var(--fluent-bg-surface);
+}
+
+.form-input-clean:focus {
+    border-color: var(--fluent-primary);
+    border-bottom-width: 2px;
+    outline: none;
+    padding-bottom: 6px;
+}
+
+/* Text Utilities */
+.text-success {
+    color: var(--fluent-success) !important;
+}
+
+.text-danger {
+    color: var(--fluent-danger) !important;
+}
+
+.text-warning {
+    color: var(--fluent-warning) !important;
+}
+
+.text-primary {
+    color: var(--fluent-primary) !important;
+}
+
+.text-muted {
+    color: var(--fluent-text-secondary) !important;
+}

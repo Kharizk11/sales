@@ -1,0 +1,1105 @@
+// Enhanced Monthly Branch Report with Analytical/Summary Toggle
+
+/**
+ * Generate monthly branch report with analytical or summary view
+ */
+async function generateMonthlyBranchReport() {
+  try {
+    const branchFilter = document.getElementById('mbrBranch')?.value || '';
+    const fromDate = document.getElementById('mbrFromDate')?.value;
+    const toDate = document.getElementById('mbrToDate')?.value;
+    const reportType = document.getElementById('mbrReportType')?.value || 'summary';
+
+    if (!fromDate || !toDate) {
+      showToast('warning', 'تحذير', 'يرجى تحديد نطاق الأشهر');
+      return;
+    }
+
+    showLoading('جاري إنشاء التقرير...');
+
+    const sales = await getSales();
+    const branches = await getBranches();
+
+    // Filter sales by date range and branch
+    const filteredSales = sales.filter(s => {
+      const saleDate = s.date;
+      const saleMonth = saleDate.substring(0, 7); // YYYY-MM
+      const inDateRange = saleMonth >= fromDate && saleMonth <= toDate;
+      const inBranch = !branchFilter || s.branch === branchFilter;
+      return inDateRange && inBranch;
+    });
+
+    if (reportType === 'detailed') {
+      generateDetailedReport(filteredSales, branchFilter);
+    } else {
+      generateSummaryReport(filteredSales, branchFilter);
+    }
+
+    hideLoading();
+
+  } catch (error) {
+    console.error('Error generating monthly branch report:', error);
+    hideLoading();
+    hideLoading();
+    showToast('error', 'خطأ', 'حدث خطأ أثناء إنشاء التقرير');
+  }
+}
+
+/**
+ * Inject Styles for Monthly Report
+ */
+function injectMonthlyReportStyles() {
+  if (document.getElementById('mbr-styles')) return;
+  const style = document.createElement('style');
+  style.id = 'mbr-styles';
+  style.textContent = `
+        .trend-icon { font-weight: bold; margin-right: 5px; font-size: 14px; }
+        .trend-up { color: #28a745; }
+        .trend-down { color: #dc3545; }
+        .trend-neutral { color: #6c757d; }
+        .best-month-row { background-color: #fff8e1 !important; border-left: 4px solid #ffc107; }
+        .best-month-badge { background-color: #ffc107; color: #000; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-right: 5px; }
+    `;
+  document.head.appendChild(style);
+}
+
+/**
+ * Generate summary report (monthly totals)
+ */
+function generateSummaryReport(sales, branchFilter) {
+  injectMonthlyReportStyles(); // Ensure styles are loaded
+
+  const summarySection = document.getElementById('summaryReportSection');
+  const detailedSection = document.getElementById('detailedReportSection');
+  const tbody = document.getElementById('mbrBody');
+  const tfoot = document.getElementById('mbrFoot');
+
+  // Show summary, hide detailed
+  summarySection.style.display = 'block';
+  detailedSection.style.display = 'none';
+
+  if (sales.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7">
+          <div class="empty-state">
+            <div class="empty-state-icon">📊</div>
+            <div class="empty-state-title">لا توجد مبيعات في الفترة المحددة</div>
+          </div>
+        </td>
+      </tr>
+    `;
+    tfoot.innerHTML = '';
+    return;
+  }
+
+  // Group by branch and month
+  const grouped = {};
+  sales.forEach(sale => {
+    const month = sale.date.substring(0, 7); // YYYY-MM
+    const branch = sale.branch;
+    const key = `${branch}|${month}`;
+
+    if (!grouped[key]) {
+      grouped[key] = {
+        branch: branch,
+        month: month,
+        count: 0,
+        total: 0
+      };
+    }
+
+    grouped[key].count++;
+    grouped[key].total += Number(sale.amount || 0);
+  });
+
+  // Convert to array and sort (ascending: January to December)
+  const data = Object.values(grouped).sort((a, b) => {
+    if (a.month !== b.month) return a.month.localeCompare(b.month);
+    return a.branch.localeCompare(b.branch);
+  });
+
+  // Calculate grand total and find max month
+  let maxTotal = 0;
+  const grandTotal = data.reduce((sum, item) => {
+    if (item.total > maxTotal) maxTotal = item.total;
+    return sum + item.total;
+  }, 0);
+
+  // Generate table rows
+  tbody.innerHTML = data.map((item, index) => {
+    const avg = item.count > 0 ? item.total / item.count : 0;
+    const percentage = grandTotal > 0 ? (item.total / grandTotal) * 100 : 0;
+    const [year, month] = item.month.split('-');
+    const monthName = getMonthName(parseInt(month));
+
+    // Trend Logic
+    let trendHtml = '<span class="trend-icon trend-neutral">-</span>';
+    if (index > 0) {
+      const prevItem = data[index - 1];
+      // Only compare if same branch, otherwise reset trend
+      if (item.branch === prevItem.branch) {
+        if (item.total > prevItem.total) trendHtml = '<span class="trend-icon trend-up">↑</span>';
+        else if (item.total < prevItem.total) trendHtml = '<span class="trend-icon trend-down">↓</span>';
+      }
+    }
+
+    // Best Month Logic
+    const isBestMonth = item.total === maxTotal && maxTotal > 0;
+    const rowClass = isBestMonth ? 'best-month-row' : '';
+    const bestBadge = isBestMonth ? '<span class="best-month-badge">الأفضل 🏆</span>' : '';
+
+    // New Order: #, Branch, Month, Count, Average, Percentage, Total
+    return `
+      <tr class="${rowClass}">
+        <td>${index + 1}</td>
+        <td><strong>${item.branch}</strong></td>
+        <td>${monthName} ${year} ${bestBadge}</td>
+        <td><span class="badge badge-primary">${item.count}</span></td>
+        <td>${formatMoney(avg)}</td>
+        <td>
+          <div class="flex items-center gap-sm">
+            <div class="progress" style="flex: 1; max-width: 80px;">
+              <div class="progress-bar success" style="width: ${percentage}%"></div>
+            </div>
+            <small class="text-muted">${percentage.toFixed(1)}%</small>
+          </div>
+        </td>
+        <td>
+            <div style="display:flex; align-items:center; justify-content:space-between">
+                <strong>${formatMoney(item.total)}</strong>
+                ${trendHtml}
+            </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // Generate footer
+  const totalCount = data.reduce((sum, item) => sum + item.count, 0);
+  const avgPerOperation = grandTotal / totalCount;
+
+  // Footer Order: Total Label, Count, Average, Percentage (100%), Grand Total
+  tfoot.innerHTML = `
+    <tr>
+      <th colspan="3" style="text-align: right;">الإجمالي</th>
+      <th><span class="badge badge-primary">${totalCount}</span></th>
+      <th>${formatMoney(avgPerOperation)}</th>
+      <th>100%</th>
+      <th><strong>${formatMoney(grandTotal)}</strong></th>
+    </tr>
+  `;
+}
+
+/**
+ * Generate detailed report (daily breakdown)
+ */
+function generateDetailedReport(sales, branchFilter) {
+  const summarySection = document.getElementById('summaryReportSection');
+  const detailedSection = document.getElementById('detailedReportSection');
+  const tbody = document.getElementById('mbrDetailedBody');
+  const tfoot = document.getElementById('mbrDetailedFoot');
+
+  // Show detailed, hide summary
+  summarySection.style.display = 'none';
+  detailedSection.style.display = 'block';
+
+  if (sales.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty-state">
+            <div class="empty-state-icon">📊</div>
+            <div class="empty-state-title">لا توجد مبيعات في الفترة المحددة</div>
+          </div>
+        </td>
+      </tr>
+    `;
+    tfoot.innerHTML = '';
+    return;
+  }
+
+  // Group by date and branch
+  const grouped = {};
+  sales.forEach(sale => {
+    const date = sale.date;
+    const branch = sale.branch;
+    const key = `${date}|${branch}`;
+
+    if (!grouped[key]) {
+      grouped[key] = {
+        date: date,
+        branch: branch,
+        count: 0,
+        total: 0
+      };
+    }
+
+    grouped[key].count++;
+    grouped[key].total += Number(sale.amount || 0);
+  });
+
+  // Convert to array and sort (ascending: oldest to newest)
+  const data = Object.values(grouped).sort((a, b) => {
+    if (a.date !== b.date) return a.date.localeCompare(b.date);
+    return a.branch.localeCompare(b.branch);
+  });
+
+  // Calculate grand total
+  const grandTotal = data.reduce((sum, item) => sum + item.total, 0);
+
+  // Generate table rows
+  tbody.innerHTML = data.map((item, index) => {
+    const avg = item.count > 0 ? item.total / item.count : 0;
+
+    return `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${formatDateForDisplay(item.date)}</td>
+        <td><strong>${item.branch}</strong></td>
+        <td><span class="badge badge-primary">${item.count}</span></td>
+        <td><strong>${formatMoney(item.total)}</strong></td>
+        <td>${formatMoney(avg)}</td>
+      </tr>
+    `;
+  }).join('');
+
+  // Generate footer
+  const totalCount = data.reduce((sum, item) => sum + item.count, 0);
+  const avgPerOperation = grandTotal / totalCount;
+
+  tfoot.innerHTML = `
+    <tr>
+      <th colspan="3" style="text-align: right;">الإجمالي</th>
+      <th><span class="badge badge-primary">${totalCount}</span></th>
+      <th><strong>${formatMoney(grandTotal)}</strong></th>
+      <th>${formatMoney(avgPerOperation)}</th>
+    </tr>
+  `;
+}
+
+/**
+ * Get Arabic month name
+ */
+function getMonthName(month) {
+  const months = [
+    'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+    'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+  ];
+  return months[month - 1] || '';
+}
+
+/**
+ * Generate print table body with only required columns
+ */
+function generatePrintTableBody(table) {
+  const tbody = table.querySelector('tbody');
+  if (!tbody) return '';
+
+  const rows = tbody.querySelectorAll('tr');
+  let html = '';
+
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length === 0) return;
+
+    // Check if it's an empty state row
+    if (cells[0].getAttribute('colspan')) {
+      html += row.outerHTML;
+      return;
+    }
+
+    // Extract only the columns we need: #, الفرع, الشهر, الإجمالي, المتوسط
+    // Original: #(0), الفرع(1), الشهر(2), عدد العمليات(3), الإجمالي(4), المتوسط(5), النسبة(6)
+    // We want: #(0), الفرع(1), الشهر(2), الإجمالي(4), المتوسط(5)
+
+    html += '<tr>';
+    html += `<td>${cells[0]?.textContent || ''}</td>`; // #
+    html += `<td>${cells[1]?.innerHTML || ''}</td>`; // الفرع
+    html += `<td>${cells[2]?.textContent || ''}</td>`; // الشهر
+    html += `<td>${cells[4]?.innerHTML || ''}</td>`; // الإجمالي
+    html += `<td>${cells[5]?.textContent || ''}</td>`; // المتوسط
+    html += '</tr>';
+  });
+
+  return html;
+}
+
+/**
+        count: 0,
+        total: 0
+      };
+    }
+
+    grouped[key].count++;
+    grouped[key].total += Number(sale.amount || 0);
+  });
+
+  // Convert to array and sort
+  const data = Object.values(grouped).sort((a, b) => {
+    if (a.month !== b.month) return b.month.localeCompare(a.month);
+    return a.branch.localeCompare(b.branch);
+  });
+
+  // Calculate grand total
+  const grandTotal = data.reduce((sum, item) => sum + item.total, 0);
+
+  // Generate table rows
+  tbody.innerHTML = data.map((item, index) => {
+    const avg = item.count > 0 ? item.total / item.count : 0;
+    const percentage = grandTotal > 0 ? (item.total / grandTotal) * 100 : 0;
+    const [year, month] = item.month.split('-');
+    const monthName = getMonthName(parseInt(month));
+
+    return `
+      <tr>
+        <td>${index + 1}</td>
+        <td><strong>${item.branch}</strong></td>
+        <td>${monthName} ${year}</td>
+        <td><span class="badge badge-primary">${item.count}</span></td>
+        <td><strong>${formatMoney(item.total)}</strong></td>
+        <td>${formatMoney(avg)}</td>
+        <td>
+          <div class="flex items-center gap-sm">
+            <div class="progress" style="flex: 1; max-width: 80px;">
+              <div class="progress-bar success" style="width: ${percentage}%"></div>
+            </div>
+            <small class="text-muted">${percentage.toFixed(1)}%</small>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // Generate footer
+  const totalCount = data.reduce((sum, item) => sum + item.count, 0);
+  const avgPerOperation = grandTotal / totalCount;
+
+  tfoot.innerHTML = `
+    <tr>
+      <th colspan="3" style="text-align: right;">الإجمالي</th>
+      <th><span class="badge badge-primary">${totalCount}</span></th>
+      <th><strong>${formatMoney(grandTotal)}</strong></th>
+      <th>${formatMoney(avgPerOperation)}</th>
+      <th>100%</th>
+    </tr>
+  `;
+}
+
+/**
+ * Generate detailed report (daily breakdown)
+ */
+function generateDetailedReport(sales, branchFilter) {
+  const summarySection = document.getElementById('summaryReportSection');
+  const detailedSection = document.getElementById('detailedReportSection');
+  const tbody = document.getElementById('mbrDetailedBody');
+  const tfoot = document.getElementById('mbrDetailedFoot');
+
+  // Show detailed, hide summary
+  summarySection.style.display = 'none';
+  detailedSection.style.display = 'block';
+
+  if (sales.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty-state">
+            <div class="empty-state-icon">📊</div>
+            <div class="empty-state-title">لا توجد مبيعات في الفترة المحددة</div>
+          </div>
+        </td>
+      </tr>
+    `;
+    tfoot.innerHTML = '';
+    return;
+  }
+
+  // Group by date and branch
+  const grouped = {};
+  sales.forEach(sale => {
+    const date = sale.date;
+    const branch = sale.branch;
+    const key = `${date}|${branch}`;
+
+    if (!grouped[key]) {
+      grouped[key] = {
+        date: date,
+        branch: branch,
+        count: 0,
+        total: 0
+      };
+    }
+
+    grouped[key].count++;
+    grouped[key].total += Number(sale.amount || 0);
+  });
+
+  // Convert to array and sort
+  const data = Object.values(grouped).sort((a, b) => {
+    if (a.date !== b.date) return b.date.localeCompare(a.date);
+    return a.branch.localeCompare(b.branch);
+  });
+
+  // Calculate grand total
+  const grandTotal = data.reduce((sum, item) => sum + item.total, 0);
+
+  // Generate table rows
+  tbody.innerHTML = data.map((item, index) => {
+    const avg = item.count > 0 ? item.total / item.count : 0;
+
+    return `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${formatDateForDisplay(item.date)}</td>
+        <td><strong>${item.branch}</strong></td>
+        <td><span class="badge badge-primary">${item.count}</span></td>
+        <td><strong>${formatMoney(item.total)}</strong></td>
+        <td>${formatMoney(avg)}</td>
+      </tr>
+    `;
+  }).join('');
+
+  // Generate footer
+  const totalCount = data.reduce((sum, item) => sum + item.count, 0);
+  const avgPerOperation = grandTotal / totalCount;
+
+  tfoot.innerHTML = `
+    <tr>
+      <th colspan="3" style="text-align: right;">الإجمالي</th>
+      <th><span class="badge badge-primary">${totalCount}</span></th>
+      <th><strong>${formatMoney(grandTotal)}</strong></th>
+      <th>${formatMoney(avgPerOperation)}</th>
+    </tr>
+  `;
+}
+
+/**
+ * Generate print table body with only required columns
+ */
+function generatePrintTableBody(table) {
+  const tbody = table.querySelector('tbody');
+  if (!tbody) return '';
+
+  const rows = tbody.querySelectorAll('tr');
+  let html = '';
+
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length === 0) return;
+
+    // Check if it's an empty state row
+    if (cells[0].getAttribute('colspan')) {
+      html += row.outerHTML;
+      return;
+    }
+
+    // Extract only the columns we need: #, الفرع, الشهر, الإجمالي, المتوسط
+    // Original: #(0), الفرع(1), الشهر(2), عدد العمليات(3), الإجمالي(4), المتوسط(5), النسبة(6)
+    // We want: #(0), الفرع(1), الشهر(2), الإجمالي(4), المتوسط(5)
+
+    html += '<tr>';
+    html += `<td>${cells[0]?.textContent || ''}</td>`; // #
+    html += `<td>${cells[1]?.innerHTML || ''}</td>`; // الفرع
+    html += `<td>${cells[2]?.textContent || ''}</td>`; // الشهر
+    html += `<td>${cells[4]?.innerHTML || ''}</td>`; // الإجمالي
+    html += `<td>${cells[5]?.textContent || ''}</td>`; // المتوسط
+    html += '</tr>';
+  });
+
+  return html;
+}
+
+/**
+ * Generate print table footer with only required columns
+ */
+function generatePrintTableFooter(table) {
+  const tfoot = table.querySelector('tfoot');
+  if (!tfoot) return '';
+
+  const row = tfoot.querySelector('tr');
+  if (!row) return '';
+
+  const cells = row.querySelectorAll('th');
+  if (cells.length === 0) return '';
+
+  // Footer structure in DOM:
+  // cells[0]: "الإجمالي" (colspan 3)
+  // cells[1]: Count (Badge)
+  // cells[2]: Total Sales
+  // cells[3]: Average
+  // cells[4]: Percentage
+
+  let html = '<tr>';
+  html += `<th colspan="3" style="text-align: right;">${cells[0]?.textContent || 'الإجمالي'}</th>`;
+  html += `<th>${cells[2]?.innerHTML || ''}</th>`; // Total Sales (Index 2)
+  html += `<th>${cells[3]?.textContent || ''}</th>`; // Average (Index 3)
+  html += '</tr>';
+
+  return html;
+}
+
+/**
+ * Get Arabic month name
+ */
+function getMonthName(month) {
+  const months = [
+    'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+    'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+  ];
+  return months[month - 1] || '';
+}
+
+/**
+ * Toggle Print Options Panel
+ */
+function togglePrintOptions() {
+  const panel = document.getElementById('printOptionsPanel');
+  if (panel) {
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  }
+}
+
+// Close panel when clicking outside
+document.addEventListener('click', function (e) {
+  const panel = document.getElementById('printOptionsPanel');
+  const btn = document.querySelector('button[onclick="togglePrintOptions()"]');
+  if (panel && btn && !panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.style.display = 'none';
+  }
+});
+
+/**
+ * Generate print table body with only required columns
+ */
+function generatePrintTableBody(table, visibility) {
+  const tbody = table.querySelector('tbody');
+  if (!tbody) return '';
+
+  const rows = tbody.querySelectorAll('tr');
+  let html = '';
+
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length === 0) return;
+
+    // Check if it's an empty state row
+    if (cells[0].getAttribute('colspan')) {
+      html += row.outerHTML;
+      return;
+    }
+
+    // DOM Order: #(0), Branch(1), Month(2), Count(3), Average(4), Total(5)
+
+    html += '<tr>';
+    if (visibility.seq) html += `<td>${cells[0]?.textContent || ''}</td>`; // #
+    if (visibility.branch) html += `<td>${cells[1]?.innerHTML || ''}</td>`; // Branch
+    if (visibility.month) html += `<td>${cells[2]?.innerHTML || ''}</td>`; // Month (with badge)
+    if (visibility.count) html += `<td>${cells[3]?.innerHTML || ''}</td>`; // Count
+    if (visibility.avg) html += `<td>${cells[4]?.textContent || ''}</td>`; // Average
+    if (visibility.total) html += `<td>${cells[5]?.innerHTML || ''}</td>`; // Total (with trend)
+    html += '</tr>';
+  });
+
+  return html;
+}
+
+/**
+ * Generate print table footer with only required columns
+ */
+function generatePrintTableFooter(table, visibility) {
+  const tfoot = table.querySelector('tfoot');
+  if (!tfoot) return '';
+
+  const row = tfoot.querySelector('tr');
+  if (!row) return '';
+
+  const cells = row.querySelectorAll('th');
+  if (cells.length === 0) return '';
+
+  // Footer DOM:
+  // cells[0]: "Total" (colspan 3)
+  // cells[1]: Count
+  // cells[2]: Average
+  // cells[3]: Grand Total
+
+  let html = '<tr>';
+
+  // Calculate colspan for the "Total" label based on visible columns before it
+  // Visible columns before Total Label are: seq, branch, month
+  // But in footer, the label spans these.
+  // If we hide some, we should adjust colspan or just show empty cells.
+  // For simplicity, let's just render the label if any of the first 3 are visible.
+
+  let firstColsCount = 0;
+  if (visibility.seq) firstColsCount++;
+  if (visibility.branch) firstColsCount++;
+  if (visibility.month) firstColsCount++;
+
+  if (firstColsCount > 0) {
+    html += `<th colspan="${firstColsCount}" style="text-align: right;">${cells[0]?.textContent || 'الإجمالي'}</th>`;
+  }
+
+  if (visibility.count) html += `<th>${cells[1]?.innerHTML || ''}</th>`; // Count
+  if (visibility.avg) html += `<th>${cells[2]?.textContent || ''}</th>`; // Average
+  if (visibility.total) html += `<th>${cells[3]?.innerHTML || ''}</th>`; // Grand Total
+  html += '</tr>';
+
+  return html;
+}
+
+/**
+ * Print monthly branch report - Professional format
+ */
+function printMonthlyBranchReport() {
+  const reportType = document.getElementById('mbrReportType')?.value || 'summary';
+  const branchFilter = document.getElementById('mbrBranch')?.value || '';
+  const fromDate = document.getElementById('mbrFromDate')?.value;
+  const toDate = document.getElementById('mbrToDate')?.value;
+
+  // Get Visibility Settings
+  const visibility = {
+    seq: document.getElementById('col-seq')?.checked ?? true,
+    branch: document.getElementById('col-branch')?.checked ?? true,
+    month: document.getElementById('col-month')?.checked ?? true,
+    count: document.getElementById('col-count')?.checked ?? true,
+    avg: document.getElementById('col-avg')?.checked ?? true,
+    total: document.getElementById('col-total')?.checked ?? true
+  };
+
+  // Get the appropriate table
+  const tableId = reportType === 'detailed' ? 'mbrDetailedTable' : 'mbrTable';
+  const table = document.getElementById(tableId);
+
+  if (!table) {
+    showToast('warning', 'تحذير', 'لا يوجد تقرير للطباعة');
+    return;
+  }
+
+  // Get branch name
+  const branchSelect = document.getElementById('mbrBranch');
+  let branchName = 'كل الفروع';
+
+  if (branchFilter && branchSelect) {
+    const selectedOption = Array.from(branchSelect.options).find(opt => opt.value === branchFilter);
+    if (selectedOption) {
+      branchName = selectedOption.text;
+    }
+  }
+
+  // Format dates
+  const formatMonth = (monthStr) => {
+    if (!monthStr) return '';
+    const [year, month] = monthStr.split('-');
+    return `${getMonthName(parseInt(month))} ${year}`;
+  };
+
+  const fromDateFormatted = formatMonth(fromDate);
+  const toDateFormatted = formatMonth(toDate);
+
+  // Create print window
+  const printWindow = window.open('', '_blank');
+
+  // Get current date
+  const now = new Date();
+  const printDate = now.toLocaleDateString('ar-SA');
+  const printTime = now.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+
+  // Report title
+  const reportTitle = reportType === 'detailed' ? 'تقرير المبيعات الشهرية - تحليلي (يومي)' : 'تقرير المبيعات الشهرية - إجمالي';
+
+  // Build Header Rows based on visibility
+  let headerHtml = '<tr>';
+  if (visibility.seq) headerHtml += '<th style="width: 50px;">#</th>';
+  if (visibility.branch) headerHtml += '<th>الفرع</th>';
+  if (visibility.month) headerHtml += '<th>الشهر / السنة</th>';
+  if (visibility.count) headerHtml += '<th>عدد العمليات</th>';
+  if (visibility.avg) headerHtml += '<th>متوسط العملية</th>';
+  if (visibility.total) headerHtml += '<th>إجمالي المبيعات</th>';
+  headerHtml += '</tr>';
+
+  // Build HTML for print
+  const printHTML = `
+    <!DOCTYPE html>
+    <html dir="rtl" lang="ar">
+    <head>
+      <meta charset="UTF-8">
+      <title>${reportTitle}</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; padding: 20mm; background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .print-header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #0078D4; padding-bottom: 20px; }
+        .company-name { font-size: 24px; font-weight: bold; color: #0078D4; margin-bottom: 5px; }
+        .report-title { font-size: 20px; font-weight: 600; color: #323130; margin-top: 15px; }
+        .report-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; padding: 15px; background: #F3F2F1; border-radius: 4px; }
+        .info-item { display: flex; gap: 10px; }
+        .info-label { font-weight: 600; color: #605E5C; }
+        .info-value { color: #323130; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th { background: #0078D4 !important; color: white !important; padding: 12px 8px; text-align: right; font-size: 13px; font-weight: 600; border: 1px solid #005A9E; -webkit-print-color-adjust: exact; }
+        td { padding: 10px 8px; border: 1px solid #E1DFDD; font-size: 13px; color: #323130; }
+        tbody tr:nth-child(even) { background: #FAF9F8; }
+        tfoot th { background: #F3F2F1 !important; color: #323130; border: 2px solid #0078D4; font-weight: bold; -webkit-print-color-adjust: exact; }
+        .print-footer { margin-top: 30px; padding-top: 15px; border-top: 2px solid #E1DFDD; font-size: 11px; color: #605E5C; text-align: center; }
+        @media print { body { padding: 10mm; } .print-footer { position: fixed; bottom: 10mm; left: 10mm; right: 10mm; } }
+        @page { size: A4; margin: 15mm; }
+        
+        /* Trend & Highlight Styles for Print */
+        .trend-icon { font-weight: bold; margin-right: 5px; font-size: 16px; }
+        .trend-up { color: #28a745 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .trend-down { color: #dc3545 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .best-month-badge { background-color: #ffc107 !important; color: #000 !important; padding: 2px 6px; border-radius: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .best-month-row { background-color: #fff8e1 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      </style>
+    </head>
+    <body>
+      <div class="print-header">
+        <div class="company-name">نظام إدارة المبيعات</div>
+        <div class="report-title">${reportTitle}</div>
+      </div>
+      
+      <div class="report-info">
+        <div class="info-item"><span class="info-label">الفرع:</span><span class="info-value">${branchName}</span></div>
+        <div class="info-item"><span class="info-label">الفترة:</span><span class="info-value">${fromDateFormatted} - ${toDateFormatted}</span></div>
+        <div class="info-item"><span class="info-label">تاريخ الطباعة:</span><span class="info-value">${printDate}</span></div>
+        <div class="info-item"><span class="info-label">وقت الطباعة:</span><span class="info-value">${printTime}</span></div>
+      </div>
+      
+      <table>
+        <thead>
+          ${headerHtml}
+        </thead>
+        <tbody>
+          ${generatePrintTableBody(table, visibility)}
+        </tbody>
+        <tfoot>
+          ${generatePrintTableFooter(table, visibility)}
+        </tfoot>
+      </table>
+      
+      <div class="print-footer">
+        <div class="footer-line">تم استخراج هذا التقرير آلياً من النظام</div>
+        <div class="designer-credit">تصميم وتطوير: م. خالد</div>
+      </div>
+      
+      <script>
+        setTimeout(() => { window.print(); window.close(); }, 500);
+      </script>
+    </body>
+    </html>
+  `;
+
+  printWindow.document.write(printHTML);
+  printWindow.document.close();
+}
+window.togglePrintOptions = togglePrintOptions;
+
+
+  const branchFilter = document.getElementById('mbrBranch')?.value || '';
+  const fromDate = document.getElementById('mbrFromDate')?.value;
+  const toDate = document.getElementById('mbrToDate')?.value;
+
+  // Get the appropriate table
+  const tableId = reportType === 'detailed' ? 'mbrDetailedTable' : 'mbrTable';
+  const table = document.getElementById(tableId);
+
+  if (!table) {
+    showToast('warning', 'تحذير', 'لا يوجد تقرير للطباعة');
+    return;
+  }
+
+  // Get branch name
+  const branchSelect = document.getElementById('mbrBranch');
+  let branchName = 'كل الفروع';
+
+  if (branchFilter && branchSelect) {
+    const selectedOption = Array.from(branchSelect.options).find(opt => opt.value === branchFilter);
+    if (selectedOption) {
+      branchName = selectedOption.text;
+    }
+  }
+
+  // Format dates
+  const formatMonth = (monthStr) => {
+    if (!monthStr) return '';
+    const [year, month] = monthStr.split('-');
+    return `${getMonthName(parseInt(month))} ${year}`;
+  };
+
+  const fromDateFormatted = formatMonth(fromDate);
+  const toDateFormatted = formatMonth(toDate);
+
+  // Create print window
+  const printWindow = window.open('', '_blank');
+
+  // Get current date
+  const now = new Date();
+  const printDate = now.toLocaleDateString('ar-SA');
+  const printTime = now.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+
+  // Report title
+  const reportTitle = reportType === 'detailed' ? 'تقرير المبيعات الشهرية - تحليلي (يومي)' : 'تقرير المبيعات الشهرية - إجمالي';
+
+  // Build HTML for print
+  const printHTML = `
+    <!DOCTYPE html>
+    <html dir="rtl" lang="ar">
+    <head>
+      <meta charset="UTF-8">
+      <title>${reportTitle}</title>
+      <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          direction: rtl;
+          padding: 20mm;
+          background: white;
+        }
+        
+        .print-header {
+          text-align: center;
+          margin-bottom: 30px;
+          border-bottom: 3px solid #0078D4;
+          padding-bottom: 20px;
+        }
+        
+        .company-name {
+          font-size: 24px;
+          font-weight: bold;
+          color: #0078D4;
+          margin-bottom: 5px;
+        }
+        
+        .report-title {
+          font-size: 20px;
+          font-weight: 600;
+          color: #323130;
+          margin-top: 15px;
+        }
+        
+        .report-info {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+          margin-bottom: 25px;
+          padding: 15px;
+          background: #F3F2F1;
+          border-radius: 4px;
+        }
+        
+        .info-item {
+          display: flex;
+          gap: 10px;
+        }
+        
+        .info-label {
+          font-weight: 600;
+          color: #605E5C;
+        }
+        
+        .info-value {
+          color: #323130;
+        }
+        
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 20px;
+        }
+        
+        th {
+          background: #0078D4;
+          color: white;
+          padding: 12px 8px;
+          text-align: right;
+          font-size: 13px;
+          font-weight: 600;
+          border: 1px solid #005A9E;
+        }
+        
+        td {
+          padding: 10px 8px;
+          border: 1px solid #E1DFDD;
+          font-size: 13px;
+          color: #323130;
+        }
+        
+        tbody tr:nth-child(even) {
+          background: #FAF9F8;
+        }
+        
+        tfoot th {
+          background: #F3F2F1;
+          color: #323130;
+          border: 2px solid #0078D4;
+          font-weight: bold;
+        }
+        
+        .print-footer {
+          margin-top: 30px;
+          padding-top: 15px;
+          border-top: 2px solid #E1DFDD;
+          font-size: 11px;
+          color: #605E5C;
+          text-align: center;
+        }
+        
+        .footer-line {
+          margin-bottom: 5px;
+        }
+        
+        .designer-credit {
+          font-weight: 600;
+          color: #0078D4;
+          margin-top: 10px;
+        }
+        
+        @media print {
+          body {
+            padding: 10mm;
+          }
+          
+          .print-footer {
+            position: fixed;
+            bottom: 10mm;
+            left: 10mm;
+            right: 10mm;
+          }
+        }
+        
+        @page {
+          size: A4;
+          margin: 15mm;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="print-header">
+        <div class="company-name">نظام إدارة المبيعات</div>
+        <div class="report-title">${reportTitle}</div>
+      </div>
+      
+      <div class="report-info">
+        <div class="info-item">
+          <span class="info-label">الفرع:</span>
+          <span class="info-value">${branchName}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">الفترة:</span>
+          <span class="info-value">${fromDateFormatted} - ${toDateFormatted}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">تاريخ الطباعة:</span>
+          <span class="info-value">${printDate}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">وقت الطباعة:</span>
+          <span class="info-value">${printTime}</span>
+        </div>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 50px;">#</th>
+            <th>الفرع</th>
+            <th>الشهر / السنة</th>
+            <th>إجمالي المبيعات</th>
+            <th>متوسط العملية</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${generatePrintTableBody(table)}
+        </tbody>
+        <tfoot>
+          ${generatePrintTableFooter(table)}
+        </tfoot>
+      </table>
+      
+      <div class="print-footer">
+        <div class="footer-line">نظام إدارة المبيعات © ${new Date().getFullYear()}</div>
+        <div class="designer-credit">تصميم وتطوير: Khaled Rezk</div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  printWindow.document.write(printHTML);
+  printWindow.document.close();
+
+  // Wait for content to load then print
+  setTimeout(() => {
+    if (printWindow) {
+      printWindow.focus();
+      printWindow.print();
+      // Optional: Close after print
+      // printWindow.close(); 
+    }
+  }, 1000);
+}
+
+/**
+ * Export monthly branch report to Excel
+ */
+function exportMonthlyBranchToExcel() {
+  const reportType = document.getElementById('mbrReportType')?.value || 'summary';
+  const tableId = reportType === 'detailed' ? 'mbrDetailedTable' : 'mbrTable';
+  const table = document.getElementById(tableId);
+
+  if (!table) {
+    showToast('warning', 'تحذير', 'لا يوجد تقرير لتصديره');
+    return;
+  }
+
+  try {
+    const wb = XLSX.utils.table_to_book(table, { sheet: "التقرير الشهري" });
+    XLSX.writeFile(wb, `monthly_report_${new Date().toISOString().split('T')[0]}.xlsx`);
+    showToast('success', 'نجح', 'تم تصدير التقرير بنجاح');
+  } catch (error) {
+    console.error('Error exporting to Excel:', error);
+    showToast('error', 'خطأ', 'حدث خطأ أثناء التصدير');
+  }
+}
+
+/**
+ * Initialize monthly report page
+ */
+async function initMonthlyReport() {
+  try {
+    const branches = await getBranches();
+    const branchSelect = document.getElementById('mbrBranch');
+
+    if (branchSelect) {
+      // Keep "All Branches" option
+      const allOption = branchSelect.options[0];
+      branchSelect.innerHTML = '';
+      branchSelect.appendChild(allOption);
+
+      // Add branches
+      branches.forEach(branch => {
+        const option = document.createElement('option');
+        option.value = branch.name;
+        option.textContent = branch.name;
+        branchSelect.appendChild(option);
+      });
+    }
+  } catch (error) {
+    console.error('Error initializing monthly report:', error);
+  }
+}
+
+// Initialize when page loads
+window.addEventListener('pageLoaded', function (e) {
+  if (e.detail.page === 'analytics') {
+    initMonthlyReport();
+  }
+});
+
+// Export functions
+window.generateMonthlyBranchReport = generateMonthlyBranchReport;
+window.printMonthlyBranchReport = printMonthlyBranchReport;
+window.exportMonthlyBranchToExcel = exportMonthlyBranchToExcel;

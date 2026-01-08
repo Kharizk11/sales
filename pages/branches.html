@@ -1,0 +1,97 @@
+<div class="main-content">
+    <div class="page-header">
+        <h1 class="page-title">🏢 إدارة الفروع</h1>
+        <div class="page-actions">
+            <button class="btn btn-primary" onclick="openBranchModal()">
+                ➕ إضافة فرع جديد
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid section-spacing">
+        <div class="stat-card card-primary">
+            <div class="stat-label">إجمالي الفروع</div>
+            <div class="stat-value" id="totalBranches">0</div>
+            <div class="stat-icon">🏢</div>
+        </div>
+        <div class="stat-card success">
+            <div class="stat-label">إجمالي المبيعات</div>
+            <div class="stat-value" id="totalBranchesSales">0.00</div>
+            <div class="stat-icon">💰</div>
+        </div>
+        <div class="stat-card warning">
+            <div class="stat-label">أفضل فرع</div>
+            <div class="stat-value" id="topBranchName">—</div>
+            <div class="stat-icon">🏆</div>
+            <div class="stat-change" id="topBranchSales"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">📋 قائمة الفروع</h2>
+            <div class="page-actions">
+                <button class="btn btn-outline btn-sm" onclick="renderBranchesTable()">
+                    🔄 تحديث
+                </button>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <table class="table-sticky">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>اسم الفرع</th>
+                        <th>الوصف</th>
+                        <th>عدد المبيعات</th>
+                        <th>إجمالي المبيعات</th>
+                        <th style="width: 150px;">الأداء</th>
+                        <th style="width: 120px;">إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="branchesBody">
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🏢</div>
+                                <div class="empty-state-title">لا توجد فروع</div>
+                                <div class="empty-state-text">ابدأ بإضافة أول فرع جديد</div>
+                                <button class="btn btn-primary mt-md" onclick="openBranchModal()">
+                                    ➕ إضافة فرع الآن
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Branch Modal -->
+<div class="modal-overlay" id="branchModalOverlay" onclick="if(event.target === this) closeBranchModal()">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title" id="branchModalTitle">إضافة فرع جديد</h2>
+            <button class="modal-close" onclick="closeBranchModal()" aria-label="إغلاق">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="branchForm" onsubmit="handleBranchSubmit(event)">
+                <input type="hidden" id="branchId">
+                <div class="form-group">
+                    <label for="branchName">اسم الفرع *</label>
+                    <input type="text" id="branchName" required placeholder="مثال: فرع الرياض" autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="branchDescription">الوصف</label>
+                    <textarea id="branchDescription" rows="3" placeholder="وصف الفرع (اختياري)"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeBranchModal()">إلغاء</button>
+            <button type="submit" form="branchForm" class="btn btn-success">💾 حفظ</button>
+        </div>
+    </div>
+</div>

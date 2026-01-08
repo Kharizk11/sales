@@ -1,0 +1,675 @@
+/* ===================================
+   SAP Fiori Theme (Quartz Light)
+   Design: Neutral, Consistent, Role-Based
+   =================================== */
+
+:root {
+    /* --- Palette: SAP Fiori Quartz Light --- */
+    --sap-shell-header-bg: #354A5F;
+    --sap-shell-header-text: #FFFFFF;
+
+    --sap-bg-app: #EDEFF0;
+    /* Shell Background */
+    --sap-bg-surface: #FFFFFF;
+    /* Cards/Content */
+    --sap-bg-hover: #EBF5FE;
+
+    --sap-primary: #0A6ED1;
+    /* Emphasized Button */
+    --sap-primary-hover: #0854A0;
+    --sap-primary-active: #063B70;
+
+    --sap-accent: #E0F0FF;
+
+    --sap-text-primary: #32363A;
+    --sap-text-secondary: #6A6D70;
+    --sap-text-disabled: #919496;
+    --sap-text-on-dark: #FFFFFF;
+
+    --sap-border: #D9D9D9;
+    --sap-border-input: #89919A;
+
+    /* --- Status Colors --- */
+    --sap-success: #107E3E;
+    --sap-warning: #E9730C;
+    --sap-error: #BB0000;
+    --sap-information: #0A6ED1;
+
+    /* --- Shadows --- */
+    --sap-shadow-card: 0 0 2px 0 rgba(0, 0, 0, 0.1), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+    --sap-shadow-header: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    --sap-shadow-hover: 0 0 2px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+
+    /* --- Radius --- */
+    --sap-radius-sm: 4px;
+    --sap-radius-md: 6px;
+    --sap-radius-lg: 8px;
+
+    /* --- Spacing --- */
+    --sap-space-xs: 0.25rem;
+    --sap-space-sm: 0.5rem;
+    --sap-space-md: 1rem;
+    --sap-space-lg: 1.5rem;
+    --sap-space-xl: 2rem;
+
+    /* --- Typography --- */
+    --font-family-base: "72", "72full", Arial, Helvetica, sans-serif;
+}
+
+/* ===================================
+   Reset & Base
+   =================================== */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--sap-bg-app);
+    color: var(--sap-text-primary);
+    font-family: var(--font-family-base);
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+    font-size: 14px;
+    /* SAP standard */
+    padding-bottom: 40px;
+    /* Space for footer */
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-weight: normal;
+    /* SAP headers are often lighter */
+    color: var(--sap-text-primary);
+}
+
+h2 {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+h3 {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+h4 {
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+a {
+    text-decoration: none;
+    color: var(--sap-primary);
+    transition: 0.2s;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ===================================
+   Layout: Shell Header & Sidebar
+   =================================== */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* Shell Header */
+.shell-header {
+    background-color: var(--sap-shell-header-bg);
+    color: var(--sap-shell-header-text);
+    height: 48px;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    box-shadow: var(--sap-shadow-header);
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+.shell-logo {
+    font-size: 1.1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 1rem;
+    /* RTL support later */
+}
+
+.shell-actions {
+    margin-right: auto;
+    /* Push to left in RTL */
+    display: flex;
+    gap: 1rem;
+}
+
+/* Sidebar / Navigation */
+.app-body {
+    display: flex;
+    margin-top: 48px;
+    /* Height of header */
+    min-height: calc(100vh - 48px);
+}
+
+.sidebar {
+    width: 240px;
+    background: var(--sap-bg-surface);
+    border-left: 1px solid var(--sap-border);
+    /* RTL */
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 48px;
+    right: 0;
+    /* RTL */
+    bottom: 0;
+    z-index: 900;
+    transition: width 0.3s;
+}
+
+.nav-links {
+    padding: 0.5rem 0;
+    overflow-y: auto;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: var(--sap-text-primary);
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    /* RTL indicator */
+    transition: background-color 0.2s;
+}
+
+.nav-item:hover {
+    background-color: var(--sap-bg-hover);
+}
+
+.nav-item.active {
+    background-color: var(--sap-bg-hover);
+    border-left-color: var(--sap-primary);
+    font-weight: bold;
+    color: var(--sap-primary);
+}
+
+.nav-icon {
+    margin-left: 0.75rem;
+    /* RTL */
+    font-size: 1.1rem;
+    width: 24px;
+    text-align: center;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    margin-right: 240px;
+    /* RTL Sidebar width */
+    padding: 2rem;
+    background-color: var(--sap-bg-app);
+    transition: margin-right 0.3s;
+}
+
+/* ===================================
+   Components: Cards (Object Page Sections)
+   =================================== */
+.sap-card {
+    background: var(--sap-bg-surface);
+    border-radius: var(--sap-radius-sm);
+    box-shadow: var(--sap-shadow-card);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.sap-card:hover {
+    box-shadow: var(--sap-shadow-hover);
+    transform: translateY(-2px);
+    border-color: var(--sap-border);
+}
+
+.sap-card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--sap-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sap-card-title {
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.sap-card-content {
+    padding: 1.5rem;
+}
+
+/* ===================================
+   Components: Tiles (Launchpad)
+   =================================== */
+.tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.sap-tile {
+    background: var(--sap-bg-surface);
+    border: 1px solid var(--sap-border);
+    border-radius: var(--sap-radius-sm);
+    padding: 1rem;
+    height: 176px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.sap-tile:hover {
+    box-shadow: var(--sap-shadow-hover);
+    border-color: var(--sap-primary);
+}
+
+.sap-tile-title {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--sap-text-secondary);
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sap-tile-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    width: 100%;
+}
+
+.sap-tile-number {
+    font-size: 1.75rem;
+    color: var(--sap-text-primary);
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    line-height: 1.2;
+    direction: ltr;
+    text-align: right;
+}
+
+.sap-tile-icon {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    /* RTL */
+    font-size: 1.5rem;
+    color: var(--sap-primary);
+    opacity: 0.8;
+}
+
+.sap-tile-info {
+    font-size: 0.8rem;
+    color: var(--sap-text-secondary);
+    margin-top: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* ===================================
+   Components: Buttons
+   =================================== */
+.btn-sap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
+    height: 36px;
+    /* SAP Standard Button Height */
+    border-radius: var(--sap-radius-sm);
+    font-size: 0.875rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.1s;
+    border: 1px solid transparent;
+    gap: 0.5rem;
+}
+
+.btn-emphasized {
+    background-color: var(--sap-primary);
+    color: white;
+    border-color: var(--sap-primary);
+}
+
+.btn-emphasized:hover {
+    background-color: var(--sap-primary-hover);
+    border-color: var(--sap-primary-hover);
+}
+
+.btn-standard {
+    background-color: transparent;
+    color: var(--sap-primary);
+    border-color: var(--sap-primary);
+}
+
+.btn-standard:hover {
+    background-color: var(--sap-bg-hover);
+}
+
+.btn-transparent {
+    background-color: transparent;
+    color: var(--sap-text-primary);
+}
+
+.btn-transparent:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* ===================================
+   Components: Inputs
+   =================================== */
+.sap-input-group {
+    margin-bottom: 1rem;
+}
+
+.sap-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--sap-text-secondary);
+}
+
+.sap-input {
+    width: 100%;
+    height: 36px;
+    padding: 0 0.75rem;
+    border: 1px solid var(--sap-border-input);
+    border-radius: var(--sap-radius-sm);
+    background-color: var(--sap-bg-surface);
+    font-size: 0.875rem;
+    color: var(--sap-text-primary);
+    transition: border-color 0.2s;
+}
+
+.sap-input:focus {
+    outline: none;
+    border-color: var(--sap-primary);
+    border-width: 2px;
+    padding: 0 0.6875rem;
+    /* Adjust for border width */
+}
+
+/* ===================================
+   Components: Tables
+   =================================== */
+.sap-table-container {
+    background: var(--sap-bg-surface);
+    border: 1px solid var(--sap-border);
+    border-radius: var(--sap-radius-sm);
+    overflow: hidden;
+}
+
+.sap-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.sap-table th {
+    background-color: #F5F7F9;
+    /* Header bg */
+    color: var(--sap-text-secondary);
+    font-weight: normal;
+    text-align: right;
+    /* RTL */
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--sap-border);
+}
+
+.sap-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--sap-border);
+    color: var(--sap-text-primary);
+}
+
+.sap-table tr:last-child td {
+    border-bottom: none;
+}
+
+.sap-table tr:hover {
+    background-color: var(--sap-bg-hover);
+}
+
+/* ===================================
+   Footer
+   =================================== */
+.sap-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 36px;
+    background-color: var(--sap-shell-header-bg);
+    color: var(--sap-shell-header-text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+    font-size: 0.8rem;
+    z-index: 1000;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sap-footer-left {
+    display: flex;
+    gap: 1rem;
+}
+
+.sap-footer-right {
+    opacity: 0.8;
+}
+
+/* ===================================
+   Backward Compatibility Layer
+   =================================== */
+:root {
+    /* Map Generic variables to SAP variables */
+    --primary-color: var(--sap-primary);
+    --primary-dark: var(--sap-primary-active);
+    --secondary-color: var(--sap-text-secondary);
+    --success-color: var(--sap-success);
+    --danger-color: var(--sap-error);
+    --warning-color: var(--sap-warning);
+
+    --bg-light: var(--sap-bg-app);
+    --bg-white: var(--sap-bg-surface);
+    --text-color: var(--sap-text-primary);
+    --border-color: var(--sap-border);
+}
+
+/* Clean Classes Mapping */
+.clean-card {
+    background: var(--sap-bg-surface);
+    border-radius: var(--sap-radius-sm);
+    box-shadow: var(--sap-shadow-card);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    padding: 0;
+    /* Let children handle padding */
+}
+
+.clean-card>div:not(.card-header-clean) {
+    padding: 1.5rem;
+}
+
+.card-header-clean {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--sap-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: transparent;
+}
+
+.card-title-clean {
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 0;
+    color: var(--sap-text-primary);
+}
+
+.btn-clean {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
+    height: 36px;
+    border-radius: var(--sap-radius-sm);
+    font-size: 0.875rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.1s;
+    border: 1px solid transparent;
+    gap: 0.5rem;
+}
+
+.btn-primary-clean {
+    background-color: var(--sap-primary);
+    color: white;
+}
+
+.btn-primary-clean:hover {
+    background-color: var(--sap-primary-hover);
+}
+
+.btn-secondary-clean {
+    background-color: transparent;
+    border: 1px solid var(--sap-primary);
+    color: var(--sap-primary);
+}
+
+.btn-secondary-clean:hover {
+    background-color: var(--sap-bg-hover);
+}
+
+.form-input-clean {
+    width: 100%;
+    height: 36px;
+    padding: 0 0.75rem;
+    border: 1px solid var(--sap-border-input);
+    border-radius: var(--sap-radius-sm);
+    background-color: var(--sap-bg-surface);
+    font-size: 0.875rem;
+    color: var(--sap-text-primary);
+}
+
+.form-input-clean:focus {
+    outline: none;
+    border-color: var(--sap-primary);
+    border-width: 2px;
+    padding: 0 0.6875rem;
+}
+
+.clean-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.clean-table th {
+    background-color: #F5F7F9;
+    color: var(--sap-text-secondary);
+    font-weight: normal;
+    text-align: right;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--sap-border);
+}
+
+.clean-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--sap-border);
+    color: var(--sap-text-primary);
+}
+
+.clean-table tr:hover {
+    background-color: var(--sap-bg-hover);
+}
+
+/* Stat Widgets Mapping */
+.stat-widget {
+    display: flex;
+    align-items: center;
+    padding: 1rem !important;
+}
+
+.stat-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-left: 1rem;
+    /* RTL */
+    background-color: var(--sap-bg-hover);
+    color: var(--sap-primary);
+}
+
+.stat-info h4 {
+    font-size: 0.875rem;
+    color: var(--sap-text-secondary);
+    margin-bottom: 0.25rem;
+    font-weight: normal;
+}
+
+.stat-info h3 {
+    font-size: 1.5rem;
+    color: var(--sap-text-primary);
+    margin: 0;
+    font-weight: bold;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(100%);
+        /* Hide RTL */
+    }
+
+    .main-content {
+        margin-right: 0;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+}

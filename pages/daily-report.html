@@ -1,0 +1,157 @@
+<div class="main-content" style="background-color: #f5f7fa; min-height: 100vh; display: flex; flex-direction: column;">
+    <div class="page-header"
+        style="margin-bottom: 1rem; padding: 1rem 2rem; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div class="header-content" style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <a href="/" class="btn btn-outline btn-sm" data-navigate>
+                    ← عودة
+                </a>
+                <h1 class="page-title" style="margin: 0; font-size: 1.2rem;">📊 تقرير المبيعات اليومي</h1>
+            </div>
+            <div class="page-actions" style="display: flex; align-items: center; gap: 10px;">
+                <div class="date-control"
+                    style="display: flex; align-items: center; gap: 0.5rem; background: #f8f9fa; padding: 5px 10px; border-radius: 8px; border: 1px solid #eee;">
+                    <label for="reportDate" style="margin: 0; color: #666; font-size: 0.9rem;">التاريخ:</label>
+                    <input type="date" id="reportDate" class="form-control"
+                        style="border: none; background: transparent; font-weight: bold; color: var(--primary); padding: 0; height: auto;">
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="generateReport()">
+                    🔄 تحديث
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="report-container"
+        style="flex: 1; max-width: 800px; margin: 0 auto; width: 100%; padding: 0 1rem 1rem 1rem; display: flex; flex-direction: column;">
+        <!-- Report Paper -->
+        <div class="report-paper" id="reportPaper"
+            style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); position: relative; flex: 1; display: flex; flex-direction: column;">
+
+            <!-- Header -->
+            <div class="report-header"
+                style="text-align: center; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px;">
+                <h2 style="color: var(--primary); font-size: 1.4rem; margin-bottom: 5px;">تقرير المبيعات اليومي</h2>
+                <div class="report-meta" style="color: #666; font-size: 0.9rem;">
+                    <span id="displayDate">--/--/----</span>
+                </div>
+            </div>
+
+            <!-- Main Stats Grid -->
+            <div class="stats-grid"
+                style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 15px; flex: 1; align-content: center;">
+
+                <!-- Today's Total -->
+                <div class="stat-box"
+                    style="background: #f8f9fa; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #eee; display: flex; flex-direction: column; justify-content: center;">
+                    <div class="stat-label" style="color: #666; font-size: 1rem; margin-bottom: 5px;">إجمالي مبيعات
+                        اليوم</div>
+                    <div class="stat-value" id="todayTotal"
+                        style="color: var(--primary); font-size: 2.2rem; font-weight: bold; line-height: 1.2;">0.00
+                    </div>
+                    <div class="stat-currency" style="color: #888; font-size: 0.9rem;">ريال سعودي</div>
+                </div>
+
+                <div class="secondary-stats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <!-- Monthly Average -->
+                    <div class="stat-box"
+                        style="background: #fff; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #eee; display: flex; flex-direction: column; justify-content: center;">
+                        <div class="stat-label" style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">المتوسط
+                            الشهري (حتى اليوم)</div>
+                        <div class="stat-value" id="monthlyAverage"
+                            style="color: #333; font-size: 1.4rem; font-weight: bold;">0.00</div>
+                    </div>
+
+                    <!-- Month Total -->
+                    <div class="stat-box"
+                        style="background: #fff; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #eee; display: flex; flex-direction: column; justify-content: center;">
+                        <div class="stat-label" style="color: #666; font-size: 0.85rem; margin-bottom: 5px;">إجمالي
+                            الشهر (تراكمي)</div>
+                        <div class="stat-value" id="monthTotal"
+                            style="color: #333; font-size: 1.4rem; font-weight: bold;">0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Info / Visuals -->
+            <div class="report-details" style="margin-top: 10px; margin-bottom: 50px;">
+                <h3
+                    style="font-size: 1rem; margin-bottom: 10px; color: #444; border-right: 3px solid var(--primary); padding-right: 8px;">
+                    تفاصيل إضافية</h3>
+                <div class="details-content"
+                    style="background: #fafafa; padding: 12px; border-radius: 8px; color: #555; line-height: 1.4; font-size: 0.9rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>عدد العمليات:</span>
+                        <span id="transactionsCount" style="font-weight: bold;">0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>أعلى عملية:</span>
+                        <span id="maxTransaction" style="font-weight: bold;">0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="report-footer" style="text-align: center; color: #999; font-size: 0.8rem; margin-top: auto;">
+                <p>تم إنشاء التقرير آلياً في <span id="generationTime">--:--</span></p>
+            </div>
+
+            <!-- Floating Actions (Inside paper for better positioning) -->
+            <div class="floating-actions"
+                style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; background: white; padding: 5px 15px; border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 100; border: 1px solid #eee;">
+                <button class="btn btn-outline btn-sm" onclick="copyReportText()" title="نسخ النص"
+                    style="font-size: 0.9rem;">
+                    📋 نسخ
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="printReport()" title="طباعة" style="font-size: 0.9rem;">
+                    🖨️ طباعة
+                </button>
+                <button class="btn btn-success btn-sm" onclick="shareReportImage()" title="مشاركة"
+                    style="font-size: 0.9rem;">
+                    🔗 مشاركة
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+
+        .page-header,
+        .floating-actions,
+        .main-sidebar {
+            display: none !important;
+        }
+
+        .main-content {
+            background: white !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            height: auto !important;
+            display: block !important;
+        }
+
+        .report-container {
+            margin: 0 !important;
+            padding: 0 !important;
+            max-width: none !important;
+            height: auto !important;
+            display: block !important;
+        }
+
+        .report-paper {
+            box-shadow: none !important;
+            border: none !important;
+            padding: 0 !important;
+            height: auto !important;
+            display: block !important;
+        }
+
+        .stats-grid {
+            display: grid !important;
+            gap: 20px !important;
+        }
+    }
+</style>

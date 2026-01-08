@@ -1,0 +1,243 @@
+/* ===================================
+   Microsoft Fluent Home Styles
+   =================================== */
+
+/* Dashboard Container */
+#home-section {
+    padding: 0;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Header Section */
+.home-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    background: var(--fluent-bg-surface);
+    padding: 20px 24px;
+    border-radius: var(--fluent-radius-md);
+    border: 1px solid var(--fluent-border);
+    box-shadow: var(--fluent-shadow-card);
+}
+
+.home-welcome h4 {
+    color: var(--fluent-text-secondary);
+    margin: 0;
+    font-weight: 400;
+    font-size: 0.95rem;
+}
+
+.home-welcome h2 {
+    margin: 4px 0 0 0;
+    color: var(--fluent-text-primary);
+    font-weight: 600;
+}
+
+/* Enhanced Stat Cards */
+.enhanced-stat-card {
+    background: var(--fluent-bg-surface);
+    border: 1px solid var(--fluent-border);
+    border-radius: var(--fluent-radius-md);
+    padding: 24px;
+    box-shadow: var(--fluent-shadow-card);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.enhanced-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--fluent-shadow-hover);
+    border-color: var(--fluent-border-input);
+}
+
+.stat-icon-box {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--fluent-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+    background-color: var(--fluent-bg-app);
+    color: var(--fluent-primary);
+}
+
+.stat-icon-primary {
+    background-color: var(--fluent-primary-light);
+    color: var(--fluent-primary);
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-info h4 {
+    margin: 0 0 4px 0;
+    font-size: 0.9rem;
+    color: var(--fluent-text-secondary);
+    font-weight: 600;
+}
+
+.stat-info h3 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--fluent-text-primary);
+}
+
+/* Quick Actions Grid */
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.quick-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    background: var(--fluent-bg-surface);
+    border: 1px solid var(--fluent-border);
+    border-radius: var(--fluent-radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+    height: 100%;
+    box-shadow: var(--fluent-shadow-card);
+}
+
+.quick-action-btn:hover {
+    background-color: var(--fluent-bg-hover);
+    border-color: var(--fluent-border-input);
+    transform: translateY(-2px);
+    box-shadow: var(--fluent-shadow-hover);
+}
+
+.quick-action-btn span:first-child {
+    font-size: 1.8rem;
+    color: var(--fluent-primary);
+}
+
+.quick-action-btn span:last-child {
+    font-weight: 600;
+    color: var(--fluent-text-primary);
+    font-size: 0.95rem;
+}
+
+/* Charts Section */
+.charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.chart-card {
+    background: var(--fluent-bg-surface);
+    border: 1px solid var(--fluent-border);
+    border-radius: var(--fluent-radius-md);
+    padding: 24px;
+    box-shadow: var(--fluent-shadow-card);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.chart-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--fluent-text-primary);
+}
+
+/* Recent Sales Table */
+.recent-sales-card {
+    background: var(--fluent-bg-surface);
+    border: 1px solid var(--fluent-border);
+    border-radius: var(--fluent-radius-md);
+    padding: 0;
+    box-shadow: var(--fluent-shadow-card);
+    overflow: hidden;
+}
+
+.recent-sales-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--fluent-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--fluent-bg-surface);
+}
+
+.recent-sales-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--fluent-text-primary);
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.home-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.home-table th {
+    background: var(--fluent-bg-surface);
+    padding: 16px 24px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--fluent-text-secondary);
+    border-bottom: 1px solid var(--fluent-border);
+    font-size: 0.9rem;
+}
+
+.home-table td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--fluent-border);
+    color: var(--fluent-text-primary);
+    font-size: 0.95rem;
+}
+
+.home-table tr:last-child td {
+    border-bottom: none;
+}
+
+.home-table tr:hover {
+    background-color: var(--fluent-bg-hover);
+}
+
+/* Loading Animation */
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 4px;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}

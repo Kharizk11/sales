@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام التصميم العصري - معاينة</title>
+    <link rel="stylesheet" href="../css/modern-design.css">
+    <style>
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-2xl);
+        }
+
+        .demo-section {
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
+        }
+
+        .component-showcase {
+            padding: var(--spacing-lg);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="demo-container">
+        <!-- Header -->
+        <header class="text-center mb-4 animate-fadeIn">
+            <h1 class="gradient-text"
+                style="font-size: var(--font-size-4xl); font-family: var(--font-display); margin-bottom: var(--spacing-md);">
+                🎨 نظام التصميم العصري
+            </h1>
+            <p style="font-size: var(--font-size-lg); color: var(--text-secondary);">
+                تصميم Glassmorphism مع تأثيرات حديثة وتفاعلات سلسة
+            </p>
+        </header>
+
+        <!-- Glass Cards Section -->
+        <section class="demo-section animate-slideInRight">
+            <h2 class="gradient-text mb-3" style="font-size: var(--font-size-2xl);">
+                📦 البطاقات الزجاجية (Glass Cards)
+            </h2>
+
+            <div class="demo-grid">
+                <div class="glass-card stagger-item">
+                    <h3 style="margin-bottom: var(--spacing-md); font-size: var(--font-size-xl);">
+                        📊 إحصائيات المبيعات
+                    </h3>
+                    <p style="color: var(--text-secondary); margin-bottom: var(--spacing-md);">
+                        إجمالي المبيعات اليوم
+                    </p>
+                    <div class="gradient-text" style="font-size: var(--font-size-3xl); font-weight: 700;">
+                        125,450 ريال
+                    </div>
+                    <div
+                        style="margin-top: var(--spacing-md); padding-top: var(--spacing-md); border-top: 1px solid var(--glass-border);">
+                        <span style="color: var(--success-start);">↑ 12.5%</span>
+                        <span style="color: var(--text-muted); margin-right: var(--spacing-sm);">من الأمس</span>
+                    </div>
+                </div>
+
+                <div class="glass-card stagger-item">
+                    <h3 style="margin-bottom: var(--spacing-md); font-size: var(--font-size-xl);">
+                        🏆 أفضل فرع
+                    </h3>
+                    <p style="color: var(--text-secondary); margin-bottom: var(--spacing-md);">
+                        الأداء الأعلى هذا الشهر
+                    </p>
+                    <div class="gradient-text" style="font-size: var(--font-size-2xl); font-weight: 700;">
+                        فرع الرياض
+                    </div>
+                    <div style="margin-top: var(--spacing-md);">
+                        <div
+                            style="background: var(--primary-gradient); height: 8px; border-radius: var(--radius-full); width: 85%;">
+                        </div>
+                        <span
+                            style="color: var(--text-muted); font-size: var(--font-size-sm); margin-top: var(--spacing-xs); display: block;">85%
+                            من الهدف</span>
+                    </div>
+                </div>
+
+                <div class="glass-card stagger-item">
+                    <h3 style="margin-bottom: var(--spacing-md); font-size: var(--font-size-xl);">
+                        🎯 الأهداف
+                    </h3>
+                    <p style="color: var(--text-secondary); margin-bottom: var(--spacing-md);">
+                        تقدم الشهر الحالي
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <div
+                            style="flex: 1; background: var(--glass-bg); height: 12px; border-radius: var(--radius-full); overflow: hidden;">
+                            <div
+                                style="background: var(--success-gradient); height: 100%; width: 68%; border-radius: var(--radius-full);">
+                            </div>
+                        </div>
+                        <span class="gradient-text" style="font-weight: 700;">68%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Buttons Section -->
+        <section class="demo-section animate-fadeIn">
+            <h2 class="gradient-text mb-3" style="font-size: var(--font-size-2xl);">
+                🔘 الأزرار الحديثة
+            </h2>
+
+            <div class="glass-card">
+                <div class="flex gap-2" style="flex-wrap: wrap;">
+                    <button class="btn-modern btn-primary">
+                        <span>💾</span>
+                        <span>حفظ</span>
+                    </button>
+
+                    <button class="btn-modern btn-secondary">
+                        <span>🔄</span>
+                        <span>تحديث</span>
+                    </button>
+
+                    <button class="btn-modern btn-glass">
+                        <span>📊</span>
+                        <span>عرض التقرير</span>
+                    </button>
+
+                    <button class="btn-modern" style="background: var(--success-gradient); color: white;">
+                        <span>✅</span>
+                        <span>موافق</span>
+                    </button>
+
+                    <button class="btn-modern" style="background: var(--warning-gradient); color: white;">
+                        <span>⚠️</span>
+                        <span>تحذير</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Forms Section -->
+        <section class="demo-section animate-slideInRight">
+            <h2 class="gradient-text mb-3" style="font-size: var(--font-size-2xl);">
+                📝 النماذج الحديثة
+            </h2>
+
+            <div class="glass-card">
+                <div class="demo-grid">
+                    <div class="form-group-modern">
+                        <input type="text" class="form-input-modern" placeholder=" " id="demo-name">
+                        <label for="demo-name" class="form-label-modern">الاسم الكامل</label>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <input type="email" class="form-input-modern" placeholder=" " id="demo-email">
+                        <label for="demo-email" class="form-label-modern">البريد الإلكتروني</label>
+                    </div>
+
+                    <div class="form-group-modern">
+                        <input type="number" class="form-input-modern" placeholder=" " id="demo-amount">
+                        <label for="demo-amount" class="form-label-modern">المبلغ</label>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 mt-3">
+                    <button class="btn-modern btn-primary">
+                        <span>💾</span>
+                        <span>حفظ البيانات</span>
+                    </button>
+                    <button class="btn-modern btn-glass">
+                        <span>🔄</span>
+                        <span>إعادة تعيين</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading States -->
+        <section class="demo-section animate-fadeIn">
+            <h2 class="gradient-text mb-3" style="font-size: var(--font-size-2xl);">
+                ⏳ حالات التحميل
+            </h2>
+
+            <div class="glass-card">
+                <div class="flex gap-3 items-center" style="flex-wrap: wrap;">
+                    <div class="spinner-modern"></div>
+
+                    <div style="flex: 1; min-width: 200px;">
+                        <div class="skeleton" style="height: 20px; margin-bottom: var(--spacing-sm);"></div>
+                        <div class="skeleton" style="height: 20px; width: 80%; margin-bottom: var(--spacing-sm);"></div>
+                        <div class="skeleton" style="height: 20px; width: 60%;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Typography -->
+        <section class="demo-section animate-slideInRight">
+            <h2 class="gradient-text mb-3" style="font-size: var(--font-size-2xl);">
+                ✍️ الطباعة (Typography)
+            </h2>
+
+            <div class="glass-card">
+                <h1 class="gradient-text" style="font-size: var(--font-size-4xl); margin-bottom: var(--spacing-md);">
+                    عنوان رئيسي كبير
+                </h1>
+                <h2
+                    style="font-size: var(--font-size-3xl); margin-bottom: var(--spacing-md); color: var(--text-primary);">
+                    عنوان ثانوي
+                </h2>
+                <h3
+                    style="font-size: var(--font-size-2xl); margin-bottom: var(--spacing-md); color: var(--text-secondary);">
+                    عنوان فرعي
+                </h3>
+                <p style="font-size: var(--font-size-lg); color: var(--text-secondary); line-height: 1.8;">
+                    هذا نص تجريبي لعرض الخط والتنسيق. يتميز النظام بخطوط حديثة وواضحة مع تباعد مريح للقراءة.
+                </p>
+                <p
+                    style="font-family: var(--font-mono); font-size: var(--font-size-sm); color: var(--text-muted); margin-top: var(--spacing-md); padding: var(--spacing-md); background: var(--glass-bg); border-radius: var(--radius-sm);">
+                    <code>// هذا نص برمجي بخط Monospace</code>
+                </p>
+            </div>
+        </section>
+
+        <!-- Interactive Demo -->
+        <section class="demo-section animate-fadeIn">
+            <h2 class="gradient-text mb-3" style="font-size: var(--font-size-2xl);">
+                🎮 تجربة تفاعلية
+            </h2>
+
+            <div class="glass-card text-center">
+                <h3 style="margin-bottom: var(--spacing-lg); font-size: var(--font-size-xl);">
+                    جرب التأثيرات التفاعلية
+                </h3>
+                <p style="color: var(--text-secondary); margin-bottom: var(--spacing-lg);">
+                    مرر الماوس على البطاقات والأزرار لرؤية التأثيرات
+                </p>
+                <button class="btn-modern btn-primary" onclick="showDemo()">
+                    <span>✨</span>
+                    <span>اضغط لرؤية التأثير</span>
+                </button>
+                <div id="demo-result" style="margin-top: var(--spacing-lg); min-height: 60px;"></div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function showDemo() {
+            const result = document.getElementById('demo-result');
+            result.innerHTML = `
+                <div class="glass-card animate-scaleIn" style="display: inline-block; padding: var(--spacing-lg);">
+                    <div class="gradient-text" style="font-size: var(--font-size-2xl); font-weight: 700;">
+                        🎉 رائع!
+                    </div>
+                    <p style="color: var(--text-secondary); margin-top: var(--spacing-sm);">
+                        التأثيرات تعمل بشكل مثالي
+                    </p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+
+</html>

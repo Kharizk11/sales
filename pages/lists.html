@@ -1,0 +1,332 @@
+<!-- Enhanced Lists Management Page -->
+<div class="main-content" style="background-color: #f5f7fa; min-height: 100vh;">
+    <!-- Page Header -->
+    <div class="page-header"
+        style="margin-bottom: 1rem; padding: 1rem 2rem; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div class="header-content"
+            style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <h1 class="page-title" style="margin: 0; font-size: 1.4rem;">📋 القوائم المحفوظة</h1>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-outline" onclick="window.location.reload()" title="تحديث">
+                    🔄 تحديث
+                </button>
+                <button class="btn btn-primary" onclick="openNewListModal()">
+                    <span>➕</span> قائمة جديدة
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div style="padding: 0 2rem 2rem 2rem;">
+        <!-- Stats -->
+        <div class="stats-grid"
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="stat-card"
+                style="background: white; padding: 1.25rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div
+                        style="width: 48px; height: 48px; background: #e3f2fd; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                        📋</div>
+                    <div>
+                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 4px;">إجمالي القوائم</div>
+                        <div id="totalLists" style="font-size: 1.5rem; font-weight: 700; color: #0078D4;">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card"
+                style="background: white; padding: 1.25rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div
+                        style="width: 48px; height: 48px; background: #d1fae5; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                        ✅</div>
+                    <div>
+                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 4px;">القوائم النشطة</div>
+                        <div id="activeLists" style="font-size: 1.5rem; font-weight: 700; color: #10b981;">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card"
+                style="background: white; padding: 1.25rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div
+                        style="width: 48px; height: 48px; background: #fef3c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                        📦</div>
+                    <div>
+                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 4px;">إجمالي المنتجات</div>
+                        <div id="totalProductsInLists" style="font-size: 1.5rem; font-weight: 700; color: #f59e0b;">0
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card"
+                style="background: white; padding: 1.25rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div
+                        style="width: 48px; height: 48px; background: #e0e7ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                        ⭐</div>
+                    <div>
+                        <div style="font-size: 0.875rem; color: #666; margin-bottom: 4px;">الأكثر استخداماً</div>
+                        <div id="mostUsedProduct" style="font-size: 0.875rem; font-weight: 600; color: #6366f1;">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div
+            style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 1.5rem;">
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                <input type="text" id="searchLists" placeholder="🔍 بحث في القوائم..." oninput="searchLists(this.value)"
+                    style="flex: 1; min-width: 200px; padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 4px;">
+
+                <select id="categoryFilter" onchange="filterListsByCategory(this.value)"
+                    style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="">كل التصنيفات</option>
+                    <option value="purchases">🛒 مشتريات</option>
+                    <option value="sales">💰 مبيعات</option>
+                    <option value="inventory">📊 جرد</option>
+                    <option value="production">🏭 إنتاج</option>
+                    <option value="other">📋 أخرى</option>
+                </select>
+
+                <select id="sortLists" onchange="sortLists(this.value)"
+                    style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="date-new">الأحدث</option>
+                    <option value="date-old">الأقدم</option>
+                    <option value="name-asc">الاسم (أ-ي)</option>
+                    <option value="name-desc">الاسم (ي-أ)</option>
+                    <option value="items-most">الأكثر منتجات</option>
+                    <option value="items-least">الأقل منتجات</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Lists Grid -->
+        <div id="listsGrid" class="lists-grid"
+            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+            <!-- Lists will be rendered here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState"
+            style="background: white; padding: 4rem 2rem; border-radius: 8px; text-align: center; display: none;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">📋</div>
+            <h3 style="margin: 0 0 0.5rem 0;">لا توجد قوائم محفوظة</h3>
+            <p style="color: #666; margin-bottom: 1.5rem;">ابدأ بإنشاء قائمة جديدة من المنتجات</p>
+            <button class="btn btn-primary" onclick="openNewListModal()">إنشاء قائمة جديدة</button>
+        </div>
+    </div>
+</div>
+
+<!-- New List Modal -->
+<div id="newListModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px; max-height: 90vh;">
+        <div class="modal-header">
+            <h3 id="modalTitle">قائمة جديدة</h3>
+            <button class="close-btn" onclick="closeNewListModal()">×</button>
+        </div>
+        <div class="modal-body" style="max-height: calc(90vh - 180px); overflow-y: auto;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <!-- Left Column: Form -->
+                <div>
+                    <h4 style="margin: 0 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid #eee;">معلومات
+                        القائمة</h4>
+
+                    <div class="form-group">
+                        <label for="listName">اسم القائمة *</label>
+                        <input type="text" id="listName" class="form-control" required
+                            placeholder="مثال: قائمة المشتريات">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="listCategory">التصنيف *</label>
+                        <select id="listCategory" class="form-control">
+                            <option value="other">📋 أخرى</option>
+                            <option value="purchases">🛒 مشتريات</option>
+                            <option value="sales">💰 مبيعات</option>
+                            <option value="inventory">📊 جرد</option>
+                            <option value="production">🏭 إنتاج</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="listNotes">ملاحظات</label>
+                        <textarea id="listNotes" class="form-control" rows="3"
+                            placeholder="ملاحظات إضافية..."></textarea>
+                    </div>
+
+                    <h4 style="margin: 1.5rem 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid #eee;">اختيار
+                        المنتجات</h4>
+
+                    <div class="form-group">
+                        <input type="text" id="searchListProducts" class="form-control" placeholder="🔍 بحث عن منتج..."
+                            oninput="filterListProducts(this.value)">
+                    </div>
+
+                    <div id="productsListContainer"
+                        style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;">
+                        <!-- Products will be listed here -->
+                    </div>
+                </div>
+
+                <!-- Right Column: Live Preview -->
+                <div>
+                    <h4 style="margin: 0 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid #eee;">معاينة مباشرة
+                    </h4>
+                    <div id="livePreview" style="background: #f8f9fa; border-radius: 8px; min-height: 400px;">
+                        <div style="padding: 2rem; text-align: center; color: #999;">لم يتم اختيار أي منتجات</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeNewListModal()">إلغاء</button>
+            <button type="button" class="btn btn-primary" onclick="saveNewList()">💾 حفظ القائمة</button>
+        </div>
+    </div>
+</div>
+
+<!-- View List Modal -->
+<div id="viewListModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-header">
+            <h3 id="viewListTitle">تفاصيل القائمة</h3>
+            <button class="close-btn" onclick="closeViewListModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <div id="viewListContent"></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeViewListModal()">إغلاق</button>
+            <button type="button" class="btn btn-primary" onclick="printCurrentList()">🖨️ طباعة</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .list-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .list-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .list-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .list-card-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+    }
+
+    .list-card-date {
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    .list-card-items {
+        margin-bottom: 1rem;
+    }
+
+    .list-card-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        font-size: 0.9375rem;
+    }
+
+    .list-card-actions {
+        display: flex;
+        gap: 0.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+        flex-wrap: wrap;
+    }
+
+    .product-list-item {
+        padding: 0.75rem;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .product-list-item:last-child {
+        border-bottom: none;
+    }
+
+    .product-list-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .product-list-item input[type="number"] {
+        width: 80px;
+        padding: 0.375rem 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.875rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #0078D4;
+    }
+</style>
+
+<script src="../js/pages/lists.js"></script>
+<script>
+    // Initialize when page loads
+    if (typeof initListsPage === 'function') {
+        initListsPage();
+    }
+
+    // Update live preview when products are selected
+    document.addEventListener('change', function (e) {
+        if (e.target.closest('#productsListContainer') || e.target.id === 'listName' || e.target.id === 'listCategory') {
+            if (typeof updateLivePreview === 'function') {
+                updateLivePreview();
+            }
+        }
+    });
+</script>

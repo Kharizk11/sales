@@ -1,0 +1,480 @@
+/* ===================================
+   Clean Modern Design System
+   تصميم نظيف واحترافي
+   =================================== */
+
+:root {
+    /* Primary Colors - ألوان احترافية */
+    --primary-color: #4318FF;
+    --primary-dark: #2B3674;
+    --primary-light: #E9E3FF;
+
+    /* Secondary Colors */
+    --secondary-color: #A3AED0;
+    --secondary-dark: #707EAE;
+
+    /* Backgrounds */
+    --bg-body: #F4F7FE;
+    --bg-card: #FFFFFF;
+    --bg-sidebar: #FFFFFF;
+
+    /* Text Colors */
+    --text-main: #2B3674;
+    --text-secondary: #A3AED0;
+    --text-light: #FFFFFF;
+
+    /* Status Colors */
+    --success-color: #05CD99;
+    --warning-color: #FFB547;
+    --danger-color: #EE5D50;
+    --info-color: #11CDEF;
+
+    /* Shadows - ظلال ناعمة جداً */
+    --shadow-sm: 0px 2px 6px rgba(112, 144, 176, 0.08);
+    --shadow-md: 0px 10px 30px rgba(112, 144, 176, 0.12);
+    --shadow-lg: 0px 20px 40px rgba(112, 144, 176, 0.16);
+
+    /* Border Radius */
+    --radius-sm: 10px;
+    --radius-md: 20px;
+    --radius-lg: 30px;
+    --radius-full: 9999px;
+
+    /* Transitions */
+    --transition: all 0.3s ease;
+
+    /* Spacing */
+    --spacing-xs: 5px;
+    --spacing-sm: 10px;
+    --spacing-md: 20px;
+    --spacing-lg: 30px;
+    --spacing-xl: 40px;
+}
+
+/* ===================================
+   Reset & Base
+   =================================== */
+body {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    font-family: 'Tajawal', 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--text-main);
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* ===================================
+   Layout Structure
+   =================================== */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* ===================================
+   Modern Sidebar - SMALLER SIZE
+   =================================== */
+.sidebar {
+    width: 220px;
+    background: var(--bg-sidebar);
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid rgba(0, 0, 0, 0.02);
+    box-shadow: var(--shadow-sm);
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 5;
+    transition: var(--transition);
+}
+
+.sidebar-header {
+    padding-bottom: 25px;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 15px;
+}
+
+.sidebar-logo {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: var(--radius-sm);
+    color: var(--secondary-dark);
+    font-weight: 500;
+    transition: var(--transition);
+    gap: 12px;
+    position: relative;
+    font-size: 0.9rem;
+}
+
+.nav-item:hover {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    transform: translateX(-3px);
+}
+
+.nav-item.active {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    box-shadow: var(--shadow-md);
+}
+
+.nav-icon {
+    font-size: 18px;
+    width: 20px;
+    text-align: center;
+}
+
+.nav-item.active .nav-icon {
+    color: var(--text-light);
+}
+
+/* Navigation Sections */
+.nav-section {
+    margin-bottom: 20px;
+}
+
+.nav-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--secondary-color);
+    padding: 8px 15px;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+.nav-section:not(:last-child) {
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.nav-section .nav-item {
+    margin-bottom: 5px;
+}
+
+/* ===================================
+   Main Content Area
+   =================================== */
+.main-content {
+    flex: 1;
+    margin-right: 220px;
+    padding: 25px;
+    transition: var(--transition);
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    background-color: var(--bg-body);
+}
+
+/* ===================================
+   Clean Cards
+   =================================== */
+.clean-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 25px;
+    box-shadow: var(--shadow-sm);
+    border: none;
+    transition: var(--transition);
+    margin-bottom: 20px;
+}
+
+.clean-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.card-header-clean {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.card-title-clean {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin: 0;
+}
+
+/* ===================================
+   Clean Forms
+   =================================== */
+.form-group-clean {
+    margin-bottom: 20px;
+}
+
+.form-label-clean {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-main);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.form-input-clean {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #E0E5F2;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    color: var(--text-main);
+    background: transparent;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.form-input-clean:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.form-input-clean::placeholder {
+    color: var(--secondary-color);
+}
+
+/* ===================================
+   Clean Buttons
+   =================================== */
+.btn-clean {
+    padding: 12px 24px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-primary-clean {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary-clean:hover {
+    background-color: var(--primary-dark);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary-clean {
+    background-color: var(--bg-body);
+    color: var(--primary-dark);
+}
+
+.btn-secondary-clean:hover {
+    background-color: #E0E5F2;
+}
+
+/* ===================================
+   Stats Widgets
+   =================================== */
+.stat-widget {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.stat-icon-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.stat-icon-primary {
+    background-color: var(--bg-body);
+    color: var(--primary-color);
+}
+
+.stat-info h4 {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    margin: 0;
+    font-weight: 500;
+}
+
+.stat-info h3 {
+    color: var(--primary-dark);
+    font-size: 1.5rem;
+    margin: 5px 0 0 0;
+    font-weight: 700;
+}
+
+/* ===================================
+   Tables
+   =================================== */
+.clean-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.clean-table th {
+    text-align: right;
+    padding: 15px;
+    color: var(--secondary-color);
+    font-weight: 500;
+    border-bottom: 1px solid #E0E5F2;
+    font-size: 0.9rem;
+}
+
+.clean-table td {
+    padding: 15px;
+    color: var(--primary-dark);
+    border-bottom: 1px solid #f0f0f0;
+    font-weight: 600;
+}
+
+.clean-table tr:last-child td {
+    border-bottom: none;
+}
+
+.clean-table tr:hover td {
+    background-color: var(--bg-body);
+}
+
+/* ===================================
+   Animations
+   =================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slideInRight {
+    animation: slideInRight 0.4s ease-out;
+}
+
+.page-section {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Spinner */
+.spinner-modern {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--bg-body);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===================================
+   Collapsible Sales Table Styles
+   =================================== */
+.year-header {
+    background: linear-gradient(135deg, var(--primary-light) 0%, #F4F7FE 100%);
+    transition: all 0.3s ease;
+}
+
+.year-header:hover {
+    background: linear-gradient(135deg, #D5CBFF 0%, #E9E3FF 100%);
+    transform: scale(1.01);
+}
+
+.month-header {
+    transition: all 0.2s ease;
+}
+
+.month-header:hover {
+    background-color: #E9E3FF !important;
+}
+
+.year-header td,
+.month-header td {
+    user-select: none;
+}
+
+
+/* ===================================
+   Responsive
+   =================================== */
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(100%);
+        right: -220px;
+    }
+
+    .main-content {
+        margin-right: 0;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+        right: 0;
+    }
+}

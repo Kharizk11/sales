@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sales-system-v2';
+const CACHE_NAME = 'sales-system-v3';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -14,10 +14,7 @@ const ASSETS_TO_CACHE = [
     './js/pages/analytics.js',
     './js/pages/ai-analytics.js',
     './js/pages/print-reports.js',
-    './js/pages/settings.js',
-    'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap',
-    'https://cdn.jsdelivr.net/npm/chart.js',
-    'https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js'
+    './js/pages/settings.js'
 ];
 
 // Install Event

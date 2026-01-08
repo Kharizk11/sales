@@ -1,0 +1,184 @@
+<div class="main-content">
+    <div class="page-header">
+        <h1 class="page-title" id="branchNameTitle">🏢 تفاصيل الفرع</h1>
+        <div class="page-actions">
+            <a href="/branches" class="btn btn-outline" data-navigate>
+                ← العودة إلى الفروع
+            </a>
+            <button class="btn btn-primary" onclick="exportBranchReport()">
+                📥 تصدير Excel
+            </button>
+        </div>
+    </div>
+
+    <!-- Branch Info Card -->
+    <div class="card" id="branchInfoCard">
+        <div class="card-header">
+            <h2 class="card-title">📊 معلومات الفرع</h2>
+        </div>
+        <div class="card-body">
+            <div class="branch-info-section" style="margin-bottom: var(--spacing-lg);">
+                <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md);">
+                    <div style="font-size: 3em;">🏢</div>
+                    <div>
+                        <h3 style="font-size: var(--font-size-xl); font-weight: 700; color: var(--text); margin-bottom: var(--spacing-xs);" id="branchNameDisplay">—</h3>
+                        <p style="color: var(--text-muted); font-size: var(--font-size-sm);" id="branchDescription">—</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">إجمالي المبيعات</div>
+                    <div class="stat-date" id="branchTotalDate" style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 0.5rem;"></div>
+                    <div class="stat-value copyable" id="branchTotal" onclick="copyStatValue(this)" title="اضغط للنسخ">0.00</div>
+                    <div class="stat-icon">💰</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-label">عدد السجلات</div>
+                    <div class="stat-value copyable" id="branchCount" onclick="copyStatValue(this)" title="اضغط للنسخ">0</div>
+                    <div class="stat-icon">📊</div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-label">متوسط المبيعات اليومية</div>
+                    <div class="stat-date" id="branchAvgDate" style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 0.5rem;"></div>
+                    <div class="stat-value copyable" id="branchAverage" onclick="copyStatValue(this)" title="اضغط للنسخ">0.00</div>
+                    <div class="stat-icon">📈</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-label">عدد الأيام</div>
+                    <div class="stat-value copyable" id="branchDays" onclick="copyStatValue(this)" title="اضغط للنسخ">0</div>
+                    <div class="stat-icon">📅</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">أعلى يوم مبيعات</div>
+                    <div class="stat-date" id="branchBestDayDate" style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 0.5rem;"></div>
+                    <div class="stat-value copyable" id="branchBestDay" onclick="copyStatValue(this)" title="اضغط للنسخ">0.00</div>
+                    <div class="stat-icon">🏆</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-label">آخر يوم مبيعات</div>
+                    <div class="stat-date" id="branchLastDayDate" style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 0.5rem;"></div>
+                    <div class="stat-value" id="branchLastDay" style="font-size: var(--font-size-lg);">—</div>
+                    <div class="stat-icon">📆</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">🔍 فلترة البيانات</h2>
+        </div>
+        <div class="card-body">
+            <div class="filters-bar">
+                <div class="form-group">
+                    <label for="branchFromDate">من تاريخ</label>
+                    <input type="date" id="branchFromDate">
+                </div>
+                <div class="form-group">
+                    <label for="branchToDate">إلى تاريخ</label>
+                    <input type="date" id="branchToDate">
+                </div>
+                <div class="form-group form-group-actions">
+                    <button type="button" class="btn btn-primary" onclick="filterBranchData()">
+                        🔍 تطبيق الفلتر
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="clearBranchFilters()">
+                        🗑️ مسح الفلاتر
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Table -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">📋 سجلات المبيعات</h2>
+            <div class="page-actions">
+                <button class="btn btn-outline btn-sm" onclick="loadBranchDetails()">
+                    🔄 تحديث
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-wrapper">
+                <table id="branchSalesTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;"></th>
+                            <th>الشهر</th>
+                            <th>عدد السجلات</th>
+                            <th>عدد الأيام</th>
+                            <th>إجمالي المبيعات</th>
+                            <th>متوسط يومي</th>
+                        </tr>
+                    </thead>
+                    <tbody id="branchSalesBody">
+                        <tr>
+                            <td colspan="6">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">📊</div>
+                                    <div class="empty-state-title">جاري تحميل البيانات...</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Monthly Details Container (hidden by default) -->
+            <div id="branchMonthlyDetailsContainer" style="display: none; margin-top: var(--spacing-lg);">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title" id="branchMonthlyDetailsTitle">تفاصيل الشهر</h3>
+                        <button class="btn btn-outline btn-sm" onclick="closeBranchMonthlyDetails()">✕ إغلاق</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>التاريخ</th>
+                                        <th>الوصف</th>
+                                        <th>ملاحظات</th>
+                                        <th>المبلغ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="branchMonthlyDetailsBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="dashboard-grid">
+        <!-- Daily Sales Chart -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">📈 المبيعات اليومية (آخر 30 يوم)</h2>
+            </div>
+            <div class="card-body">
+                <canvas id="branchDailyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Monthly Sales Chart -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">📅 المبيعات الشهرية (آخر 6 أشهر)</h2>
+            </div>
+            <div class="card-body">
+                <canvas id="branchMonthlyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>

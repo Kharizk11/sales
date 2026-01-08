@@ -1,0 +1,52 @@
+<div class="main-content">
+    <div class="page-header">
+        <h1 class="page-title">👥 إدارة المستخدمين</h1>
+        <div class="page-actions">
+            <button class="btn btn-primary" onclick="navigateToUserForm()">
+                ➕ إضافة مستخدم جديد
+            </button>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">📋 قائمة المستخدمين</h2>
+            <div class="page-actions">
+                <button class="btn btn-outline btn-sm" onclick="loadUsers()">
+                    🔄 تحديث
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>اسم المستخدم</th>
+                            <th>الاسم الكامل</th>
+                            <th>البريد الإلكتروني</th>
+                            <th>الفرع</th>
+                            <th>الصلاحية</th>
+                            <th>الحالة</th>
+                            <th>تاريخ الإنشاء</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersBody">
+                        <tr>
+                            <td colspan="9">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">👥</div>
+                                    <div class="empty-state-title">جاري تحميل البيانات...</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+

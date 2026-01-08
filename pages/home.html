@@ -1,0 +1,219 @@
+<div class="main-content">
+    <!-- Modern Header with Gradient -->
+    <div class="page-header animate-fadeIn"
+        style="background: var(--primary-gradient); padding: var(--spacing-xl); border-radius: var(--radius-lg); margin-bottom: var(--spacing-xl); color: white;">
+        <h1
+            style="font-size: var(--font-size-4xl); font-family: var(--font-display); margin-bottom: var(--spacing-sm);">
+            📊 لوحة التحكم الرئيسية
+        </h1>
+        <p style="font-size: var(--font-size-lg); opacity: 0.9;">
+            نظام إدارة المبيعات الذكي
+        </p>
+        <div class="flex gap-2" style="margin-top: var(--spacing-lg); flex-wrap: wrap;">
+            <button class="btn-modern btn-glass" onclick="updateDashboard()">
+                <span>🔄</span>
+                <span>تحديث البيانات</span>
+            </button>
+            <button class="btn-modern btn-glass" onclick="openReportModal()">
+                <span>📄</span>
+                <span>توليد التقرير</span>
+            </button>
+            <a href="/sales" class="btn-modern" data-navigate style="background: white; color: var(--primary-start);">
+                <span>➕</span>
+                <span>إضافة مبيعات جديدة</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Access Navigation with Glass Cards -->
+    <div class="glass-card mb-3 animate-slideInRight">
+        <h2 class="gradient-text mb-3" style="font-size: var(--font-size-2xl);">
+            🚀 الوصول السريع
+        </h2>
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md);">
+            <a href="/branches" class="glass-card text-center stagger-item" data-navigate
+                style="text-decoration: none; color: inherit; padding: var(--spacing-lg);">
+                <div style="font-size: 3rem; margin-bottom: var(--spacing-sm);">🏢</div>
+                <div class="gradient-text"
+                    style="font-size: var(--font-size-xl); font-weight: 700; margin-bottom: var(--spacing-xs);">الفروع
+                </div>
+                <div class="stat-value" id="navBranchesCount"
+                    style="font-size: var(--font-size-2xl); margin: var(--spacing-sm) 0;">0</div>
+                <div style="color: var(--text-muted); font-size: var(--font-size-sm);">إدارة الفروع</div>
+            </a>
+            <a href="/sales" class="glass-card text-center stagger-item" data-navigate
+                style="text-decoration: none; color: inherit; padding: var(--spacing-lg);">
+                <div style="font-size: 3rem; margin-bottom: var(--spacing-sm);">💰</div>
+                <div class="gradient-text"
+                    style="font-size: var(--font-size-xl); font-weight: 700; margin-bottom: var(--spacing-xs);">المبيعات
+                </div>
+                <div class="stat-value" id="navSalesCount"
+                    style="font-size: var(--font-size-2xl); margin: var(--spacing-sm) 0;">0</div>
+                <div style="color: var(--text-muted); font-size: var(--font-size-sm);">تسجيل المبيعات</div>
+            </a>
+            <a href="/analytics" class="glass-card text-center stagger-item" data-navigate
+                style="text-decoration: none; color: inherit; padding: var(--spacing-lg);">
+                <div style="font-size: 3rem; margin-bottom: var(--spacing-sm);">📊</div>
+                <div class="gradient-text"
+                    style="font-size: var(--font-size-xl); font-weight: 700; margin-bottom: var(--spacing-xs);">التقارير
+                </div>
+                <div style="color: var(--text-muted); font-size: var(--font-size-sm);">التحليلات والإحصائيات</div>
+            </a>
+            <a href="/users" class="glass-card text-center stagger-item" data-navigate id="navUsersCard"
+                style="display: none; text-decoration: none; color: inherit; padding: var(--spacing-lg);">
+                <div style="font-size: 3rem; margin-bottom: var(--spacing-sm);">👥</div>
+                <div class="gradient-text"
+                    style="font-size: var(--font-size-xl); font-weight: 700; margin-bottom: var(--spacing-xs);">
+                    المستخدمين</div>
+                <div class="stat-value" id="navUsersCount"
+                    style="font-size: var(--font-size-2xl); margin: var(--spacing-sm) 0;">0</div>
+                <div style="color: var(--text-muted); font-size: var(--font-size-sm);">إدارة المستخدمين</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Grid with Modern Glass Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-xl);"
+        id="homeStats">
+        <a href="/daily-report" class="glass-card text-center animate-fadeIn" data-navigate
+            style="text-decoration: none; color: inherit;">
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted); margin-bottom: var(--spacing-sm);">
+                💰 إجمالي المبيعات اليوم
+            </div>
+            <div class="stat-date" id="statTodayDate"
+                style="font-size: var(--font-size-xs); color: var(--text-muted); margin-bottom: var(--spacing-sm);">
+            </div>
+            <div class="gradient-text" id="statToday"
+                style="font-size: var(--font-size-3xl); font-weight: 700; margin: var(--spacing-md) 0;">0.00</div>
+            <div id="statTodayChange" style="font-size: var(--font-size-sm);"></div>
+        </a>
+
+        <div class="glass-card text-center animate-fadeIn">
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted); margin-bottom: var(--spacing-sm);">
+                📈 إجمالي المبيعات الشهرية
+            </div>
+            <div class="stat-date" id="statMonthDate"
+                style="font-size: var(--font-size-xs); color: var(--text-muted); margin-bottom: var(--spacing-sm);">
+            </div>
+            <div class="gradient-text" id="statMonth"
+                style="font-size: var(--font-size-3xl); font-weight: 700; margin: var(--spacing-md) 0;">0.00</div>
+            <div id="statMonthChange" style="font-size: var(--font-size-sm);"></div>
+        </div>
+
+        <div class="glass-card text-center animate-fadeIn">
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted); margin-bottom: var(--spacing-sm);">
+                📊 متوسط المبيعات اليومية
+            </div>
+            <div class="stat-date" id="statAvgDailyDate"
+                style="font-size: var(--font-size-xs); color: var(--text-muted); margin-bottom: var(--spacing-sm);">
+            </div>
+            <div class="gradient-text" id="statAvgDaily"
+                style="font-size: var(--font-size-3xl); font-weight: 700; margin: var(--spacing-md) 0;">0.00</div>
+        </div>
+
+        <div class="glass-card text-center animate-fadeIn">
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted); margin-bottom: var(--spacing-sm);">
+                🏢 عدد الفروع
+            </div>
+            <div class="gradient-text" id="statBranches"
+                style="font-size: var(--font-size-3xl); font-weight: 700; margin: var(--spacing-md) 0;">0</div>
+        </div>
+
+        <div class="glass-card text-center animate-fadeIn">
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted); margin-bottom: var(--spacing-sm);">
+                📋 عدد سجلات المبيعات
+            </div>
+            <div class="gradient-text" id="statSalesCount"
+                style="font-size: var(--font-size-3xl); font-weight: 700; margin: var(--spacing-md) 0;">0</div>
+        </div>
+
+        <div class="glass-card text-center animate-fadeIn">
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted); margin-bottom: var(--spacing-sm);">
+                🏆 أعلى فرع مبيعات
+            </div>
+            <div class="gradient-text" id="statTopBranch"
+                style="font-size: var(--font-size-2xl); font-weight: 700; margin: var(--spacing-md) 0;">—</div>
+        </div>
+    </div>
+
+    <!-- Charts Row with Glass Cards -->
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-xl);">
+        <div class="glass-card animate-slideInRight">
+            <h3 class="gradient-text mb-3" style="font-size: var(--font-size-xl);">
+                📈 المبيعات اليومية (آخر 7 أيام)
+            </h3>
+            <div style="height: 300px;">
+                <canvas id="dailySalesChart"></canvas>
+            </div>
+        </div>
+
+        <div class="glass-card animate-slideInRight">
+            <h3 class="gradient-text mb-3" style="font-size: var(--font-size-xl);">
+                🥧 المبيعات حسب الفروع
+            </h3>
+            <div style="height: 300px;">
+                <canvas id="branchesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Sales Chart -->
+    <div class="glass-card mb-3 animate-fadeIn">
+        <h3 class="gradient-text mb-3" style="font-size: var(--font-size-xl);">
+            📅 المبيعات الشهرية (آخر 6 أشهر)
+        </h3>
+        <div style="height: 350px;">
+            <canvas id="monthlySalesChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Recent Sales and Top Branches -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: var(--spacing-lg);">
+        <div class="glass-card animate-fadeIn">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="gradient-text" style="font-size: var(--font-size-xl);">📋 آخر المبيعات</h3>
+                <a href="/sales" class="btn-modern btn-glass" data-navigate
+                    style="padding: 0.5rem 1rem; font-size: var(--font-size-sm);">
+                    عرض الكل →
+                </a>
+            </div>
+            <div class="table-wrapper">
+                <table id="recentSalesTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>التاريخ</th>
+                            <th>الفرع</th>
+                            <th>الوصف</th>
+                            <th>المبلغ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentSalesBody">
+                        <tr>
+                            <td colspan="5">
+                                <div class="text-center" style="padding: var(--spacing-lg); color: var(--text-muted);">
+                                    <div style="font-size: 3rem; margin-bottom: var(--spacing-sm);">📊</div>
+                                    <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">لا توجد مبيعات
+                                        حديثة</div>
+                                    <div style="font-size: var(--font-size-sm);">ابدأ بإضافة أول عملية مبيعات</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="glass-card animate-fadeIn">
+            <h3 class="gradient-text mb-3" style="font-size: var(--font-size-xl);">🏆 ترتيب الفروع</h3>
+            <div id="topBranchesList">
+                <div class="text-center" style="padding: var(--spacing-lg); color: var(--text-muted);">
+                    <div style="font-size: 3rem; margin-bottom: var(--spacing-sm);">🏢</div>
+                    <div style="font-weight: 600;">لا توجد بيانات</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
