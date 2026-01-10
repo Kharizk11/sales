@@ -791,10 +791,150 @@ async function saveReconciliations(recs) {
   }
 }
 
+/**
+ * Get all Treasury Reconciliations
+ */
+let treasuryReconciliationsData = [];
+async function getTreasuryReconciliations() {
+  if (treasuryReconciliationsData.length > 0) {
+    return treasuryReconciliationsData;
+  }
+
+  if (db) {
+    try {
+      const recCollection = 'treasury_reconciliations';
+      const snapshot = await db.collection(recCollection).get();
+      const recs = [];
+      snapshot.forEach(doc => {
+        recs.push({ id: doc.id, ...doc.data() });
+      });
+      treasuryReconciliationsData = recs;
+      return recs;
+    } catch (error) {
+      console.error('Error fetching treasury reconciliations from Firebase:', error);
+    }
+  }
+
+  try {
+    const storageKey = 'treasury_reconciliations_data';
+    const localData = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    treasuryReconciliationsData = localData;
+    return localData;
+  } catch (error) {
+    console.error('Error fetching treasury reconciliations from localStorage:', error);
+    return [];
+  }
+}
+
+/**
+ * Save Treasury Reconciliations
+ */
+async function saveTreasuryReconciliations(recs) {
+  treasuryReconciliationsData = recs;
+
+  if (db) {
+    try {
+      const recCollection = 'treasury_reconciliations';
+      const batch = db.batch();
+      const snapshot = await db.collection(recCollection).get();
+
+      snapshot.forEach(doc => {
+        batch.delete(doc.ref);
+      });
+
+      recs.forEach(r => {
+        const recRef = db.collection(recCollection).doc(r.id);
+        batch.set(recRef, r); // Save the whole object
+      });
+
+      await batch.commit();
+      return;
+    } catch (error) {
+      console.error('Error saving treasury reconciliations to Firebase:', error);
+    }
+  }
+
+  try {
+    const storageKey = 'treasury_reconciliations_data';
+    localStorage.setItem(storageKey, JSON.stringify(recs));
+  } catch (error) {
+    console.error('Error saving treasury reconciliations to localStorage:', error);
+  }
+}
+
+/**
+ * Get Treasury Definitions
+ */
+let treasuryDefinitionsData = null;
+async function getTreasuryDefinitions() {
+  if (treasuryDefinitionsData) {
+    return treasuryDefinitionsData;
+  }
+
+  const defaultDefs = {
+    expenses: ['كهرباء', 'ماء', 'إيجار', 'رواتب', 'نثريات', 'صيانة'],
+    payments: ['مورد 1', 'مورد 2', 'شركة المراعي', 'شركة الصافي'],
+    transfers: ['تحويل للمالك', 'إيداع بنكي'],
+    deposits: ['مبيعات نقدية', 'إيراد آخر']
+  };
+
+  if (db) {
+    try {
+      const doc = await db.collection('settings').doc('treasury_definitions').get();
+      if (doc.exists) {
+        treasuryDefinitionsData = doc.data();
+        return treasuryDefinitionsData;
+      }
+    } catch (error) {
+      console.error('Error fetching treasury definitions from Firebase:', error);
+    }
+  }
+
+  try {
+    const storageKey = 'treasury_definitions_data';
+    const localData = localStorage.getItem(storageKey);
+    if (localData) {
+      treasuryDefinitionsData = JSON.parse(localData);
+    } else {
+      treasuryDefinitionsData = defaultDefs;
+    }
+    return treasuryDefinitionsData;
+  } catch (error) {
+    console.error('Error fetching treasury definitions from localStorage:', error);
+    return defaultDefs;
+  }
+}
+
+/**
+ * Save Treasury Definitions
+ */
+async function saveTreasuryDefinitions(defs) {
+  treasuryDefinitionsData = defs;
+
+  if (db) {
+    try {
+      await db.collection('settings').doc('treasury_definitions').set(defs);
+    } catch (error) {
+      console.error('Error saving treasury definitions to Firebase:', error);
+    }
+  }
+
+  try {
+    const storageKey = 'treasury_definitions_data';
+    localStorage.setItem(storageKey, JSON.stringify(defs));
+  } catch (error) {
+    console.error('Error saving treasury definitions to localStorage:', error);
+  }
+}
+
 window.getPOS = getPOS;
 window.savePOS = savePOS;
 window.getReconciliations = getReconciliations;
 window.saveReconciliations = saveReconciliations;
+window.getTreasuryReconciliations = getTreasuryReconciliations;
+window.saveTreasuryReconciliations = saveTreasuryReconciliations;
+window.getTreasuryDefinitions = getTreasuryDefinitions;
+window.saveTreasuryDefinitions = saveTreasuryDefinitions;
 
 /**
  * Get all Cashiers

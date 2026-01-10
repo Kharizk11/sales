@@ -32,6 +32,32 @@
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #treasuryPrintArea,
+            #treasuryPrintArea * {
+                visibility: visible;
+            }
+
+            #treasuryPrintArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                display: block !important;
+                background: white;
+                padding: 20px;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -79,6 +105,10 @@
                     <div class="nav-item" onclick="navigateTo('reconciliation')">
                         <span class="nav-icon">⚖️</span>
                         <span>تسوية الصندوق</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('treasury')">
+                        <span class="nav-icon">🏦</span>
+                        <span>الخزينة الرئيسية</span>
                     </div>
                     <div class="nav-item" onclick="navigateTo('settings')">
                         <span class="nav-icon">⚙️</span>
@@ -541,6 +571,322 @@
                     </div>
                 </div>
 
+                <!-- TREASURY SECTION -->
+                <div id="treasury-section" class="page-section" style="display: none;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 style="margin: 0;">تسوية الخزينة الرئيسية</h2>
+                        <div>
+                            <button class="btn-sap btn-standard" onclick="toggleTreasuryView('form')">تسوية
+                                يومية</button>
+                            <button class="btn-sap btn-standard"
+                                onclick="toggleTreasuryView('reports')">التقارير</button>
+                        </div>
+                    </div>
+
+                    <!-- REPORTS VIEW -->
+                    <div id="treasuryReportsView" style="display: none;">
+                        <div class="sap-card">
+                            <div class="sap-card-header">
+                                <h3 class="sap-card-title">تقارير الخزينة التفصيلية</h3>
+                            </div>
+                            <div class="sap-card-content">
+                                <!-- Filters -->
+                                <div
+                                    style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; align-items: flex-end;">
+                                    <div class="sap-input-group" style="flex: 1; min-width: 150px;">
+                                        <label class="sap-label">من تاريخ</label>
+                                        <input type="date" id="repStartDate" class="sap-input">
+                                    </div>
+                                    <div class="sap-input-group" style="flex: 1; min-width: 150px;">
+                                        <label class="sap-label">إلى تاريخ</label>
+                                        <input type="date" id="repEndDate" class="sap-input">
+                                    </div>
+                                    <div class="sap-input-group" style="flex: 1; min-width: 150px;">
+                                        <label class="sap-label">نوع الحركة</label>
+                                        <select id="repType" class="sap-input">
+                                            <option value="all">الكل</option>
+                                            <option value="expenses">مصروفات</option>
+                                            <option value="payments">مدفوعات</option>
+                                            <option value="transfers">تحويلات</option>
+                                            <option value="deposits">إيداعات</option>
+                                        </select>
+                                    </div>
+                                    <div class="sap-input-group" style="flex: 1; min-width: 150px;">
+                                        <label class="sap-label">بحث في البنود</label>
+                                        <input type="text" id="repSearch" class="sap-input" placeholder="اسم البند...">
+                                    </div>
+                                    <button class="btn-sap btn-emphasized" onclick="filterTreasuryReports()">عرض
+                                        التقرير</button>
+                                    <button class="btn-sap btn-standard" onclick="exportTreasuryReport()">تصدير
+                                        Excel</button>
+                                </div>
+
+                                <!-- Results Table -->
+                                <table class="sap-table">
+                                    <thead>
+                                        <tr>
+                                            <th>التاريخ</th>
+                                            <th>النوع</th>
+                                            <th>البند / الجهة</th>
+                                            <th>المبلغ</th>
+                                            <th>ملاحظات التسوية</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="treasuryReportsBody"></tbody>
+                                    <tfoot>
+                                        <tr style="font-weight: bold; background: var(--sap-bg-secondary);">
+                                            <td colspan="3">الإجمالي</td>
+                                            <td id="repTotalAmount">0.00</td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="treasuryFormSection">
+                        <div class="sap-card">
+                            <div class="sap-card-header">
+                                <h3 class="sap-card-title">بيانات التسوية اليومية</h3>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <label>التاريخ:</label>
+                                    <input type="date" id="treasuryDate" class="sap-input"
+                                        onchange="loadTreasuryDataForDate(this.value)">
+                                </div>
+                            </div>
+                            <div class="sap-card-content">
+                                <form onsubmit="handleTreasurySubmit(event)">
+
+                                    <!-- SECTION 1: RECEIPTS (المقبوضات) -->
+                                    <div class="sap-card"
+                                        style="margin-bottom: 1.5rem; border-left: 4px solid var(--sap-success);">
+                                        <div class="sap-card-header">
+                                            <h4 class="sap-card-title">1. المقبوضات (Receipts)</h4>
+                                        </div>
+                                        <div class="sap-card-content">
+                                            <div
+                                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                                                <div class="sap-input-group">
+                                                    <label class="sap-label">رصيد بداية اليوم (الفعلي السابق)</label>
+                                                    <input type="number" id="trOpeningBalance" class="sap-input"
+                                                        step="0.01" value="0" oninput="calculateTreasury()">
+                                                </div>
+                                                <div class="sap-input-group">
+                                                    <label class="sap-label">إجمالي المبيعات (Z-Report)</label>
+                                                    <div id="trPosSales"
+                                                        style="font-weight: bold; font-size: 1.2rem; padding: 8px;">0.00
+                                                    </div>
+                                                </div>
+                                                <div class="sap-input-group">
+                                                    <label class="sap-label">مرتجع مصروفات (وارد)</label>
+                                                    <input type="number" id="trReturns" class="sap-input" step="0.01"
+                                                        value="0" oninput="calculateTreasury()">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SECTION 2: NON-CASH DEDUCTIONS (خصم غير نقدي) -->
+                                    <div class="sap-card"
+                                        style="margin-bottom: 1.5rem; border-left: 4px solid var(--sap-warning);">
+                                        <div class="sap-card-header">
+                                            <h4 class="sap-card-title">2. الخصومات غير النقدية (Non-Cash Deductions)
+                                            </h4>
+                                        </div>
+                                        <div class="sap-card-content">
+                                            <div style="margin-bottom: 1.5rem;">
+                                                <label class="sap-label">إجمالي الشبكات (مدى/فيزا)</label>
+                                                <div id="trPosNetwork"
+                                                    style="font-weight: bold; font-size: 1.2rem; padding: 8px; color: var(--sap-text-secondary);">
+                                                    0.00</div>
+                                            </div>
+
+                                            <!-- Customer Transfers Table -->
+                                            <div
+                                                style="border: 1px solid var(--sap-border-color); border-radius: 4px; padding: 10px;">
+                                                <div
+                                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                                    <h5 style="margin: 0;">📥 تحويلات العملاء (وارد للبنك)</h5>
+                                                    <button type="button" class="btn-sap btn-transparent"
+                                                        onclick="openDefinitionModal('transfers')"
+                                                        style="font-size: 0.8rem; border: 1px solid #ccc;">+ إدارة
+                                                        البنود</button>
+                                                </div>
+                                                <table class="sap-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>العميل</th>
+                                                            <th width="100">المبلغ</th>
+                                                            <th width="50"></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="trTransfersBody"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SECTION 3: OUTFLOWS (المصروفات والإيداعات) -->
+                                    <div class="sap-card"
+                                        style="margin-bottom: 1.5rem; border-left: 4px solid var(--sap-error);">
+                                        <div class="sap-card-header">
+                                            <h4 class="sap-card-title">3. المصروفات والإيداعات (Outflows)</h4>
+                                        </div>
+                                        <div class="sap-card-content">
+                                            <div
+                                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem;">
+
+                                                <!-- Expenses Table -->
+                                                <div
+                                                    style="border: 1px solid var(--sap-border-color); border-radius: 4px; padding: 10px;">
+                                                    <div
+                                                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                                        <h5 style="margin: 0;">💸 المصروفات</h5>
+                                                        <button type="button" class="btn-sap btn-transparent"
+                                                            onclick="openDefinitionModal('expenses')"
+                                                            style="font-size: 0.8rem; border: 1px solid #ccc;">+ إدارة
+                                                            البنود</button>
+                                                    </div>
+                                                    <table class="sap-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>البند</th>
+                                                                <th width="100">المبلغ</th>
+                                                                <th width="50"></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="trExpensesBody"></tbody>
+                                                    </table>
+                                                </div>
+
+                                                <!-- Payments Table -->
+                                                <div
+                                                    style="border: 1px solid var(--sap-border-color); border-radius: 4px; padding: 10px;">
+                                                    <div
+                                                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                                        <h5 style="margin: 0;">🧾 مدفوعات الشركات</h5>
+                                                        <button type="button" class="btn-sap btn-transparent"
+                                                            onclick="openDefinitionModal('payments')"
+                                                            style="font-size: 0.8rem; border: 1px solid #ccc;">+ إدارة
+                                                            البنود</button>
+                                                    </div>
+                                                    <table class="sap-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>الشركة/المورد</th>
+                                                                <th width="100">المبلغ</th>
+                                                                <th width="50"></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="trPaymentsBody"></tbody>
+                                                    </table>
+                                                </div>
+
+                                                <!-- Bank Deposits Table -->
+                                                <div
+                                                    style="border: 1px solid var(--sap-border-color); border-radius: 4px; padding: 10px;">
+                                                    <div
+                                                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                                        <h5 style="margin: 0;">🏦 إيداع للبنك (صادر)</h5>
+                                                        <button type="button" class="btn-sap btn-transparent"
+                                                            onclick="openDefinitionModal('deposits')"
+                                                            style="font-size: 0.8rem; border: 1px solid #ccc;">+ إدارة
+                                                            البنود</button>
+                                                    </div>
+                                                    <table class="sap-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>البنك / المودع</th>
+                                                                <th width="100">المبلغ</th>
+                                                                <th width="50"></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="trDepositsBody"></tbody>
+                                                    </table>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- SECTION 4: TOTALS (الخاتمة) -->
+                                    <div class="sap-card"
+                                        style="margin-bottom: 1.5rem; background: var(--sap-bg-secondary);">
+                                        <div class="sap-card-header">
+                                            <h4 class="sap-card-title">4. النتيجة النهائية (Final Totals)</h4>
+                                        </div>
+                                        <div class="sap-card-content">
+                                            <div
+                                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                                                <div class="sap-input-group">
+                                                    <label class="sap-label">صافي النقد الوارد (Cash Inflow)</label>
+                                                    <div id="trNetCash" style="font-weight: bold; font-size: 1.2rem;">
+                                                        0.00</div>
+                                                </div>
+                                                <div class="sap-input-group">
+                                                    <label class="sap-label">الرصيد الدفتري (المتوقع)</label>
+                                                    <div id="trBookBalance"
+                                                        style="font-weight: bold; font-size: 1.2rem; color: var(--sap-primary);">
+                                                        0.00</div>
+                                                </div>
+                                                <div class="sap-input-group">
+                                                    <label class="sap-label">الرصيد الفعلي (جرد الخزينة)</label>
+                                                    <input type="number" id="trActualCash" class="sap-input" step="0.01"
+                                                        value="0" oninput="calculateTreasury()"
+                                                        style="font-weight: bold;">
+                                                </div>
+                                                <div class="sap-input-group">
+                                                    <label class="sap-label">الفرق (عجز / زيادة)</label>
+                                                    <div id="trDifference"
+                                                        style="font-weight: bold; font-size: 1.5rem;">0.00</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="sap-input-group" style="margin-top: 1.5rem;">
+                                                <label class="sap-label">ملاحظات</label>
+                                                <textarea id="trNotes" class="sap-input" rows="3"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        style="display: flex; justify-content: flex-end; margin-top: 1.5rem; gap: 10px;">
+                                        <button type="button" class="btn-sap btn-standard"
+                                            onclick="printTreasuryReconciliation()" style="min-width: 150px;">🖨️
+                                            طباعة</button>
+                                        <button type="submit" class="btn-sap btn-emphasized"
+                                            style="min-width: 200px;">💾 حفظ التسوية</button>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History Table -->
+                    <div class="sap-card" style="margin-top: 2rem;">
+                        <div class="sap-card-header">
+                            <h3 class="sap-card-title">سجل تسويات الخزينة</h3>
+                        </div>
+                        <div class="sap-card-content" style="padding: 0;">
+                            <table class="sap-table">
+                                <thead>
+                                    <tr>
+                                        <th>التاريخ</th>
+                                        <th>الرصيد الدفتري</th>
+                                        <th>الرصيد الفعلي</th>
+                                        <th>الفرق</th>
+                                        <th>عرض</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="treasuryHistoryBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- ANALYTICS SECTION -->
                 <div id="analytics-section" class="page-section" style="display: none;">
                     <h2 style="margin-bottom: 1.5rem;">التقارير والتحليلات</h2>
@@ -653,7 +999,33 @@
         </div>
     </div>
 
-    <!-- Branch Modal -->
+    <!-- Definition Modal -->
+    <div id="definitionModal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;">
+        <div class="sap-card" style="width: 400px; max-width: 90%; margin: 0;">
+            <div class="sap-card-header">
+                <h3 class="sap-card-title" id="defModalTitle">إدارة البنود</h3>
+                <button onclick="closeDefinitionModal()"
+                    style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div class="sap-card-content">
+                <div style="display: flex; gap: 10px; margin-bottom: 1rem;">
+                    <input type="text" id="defInput" class="sap-input" placeholder="اسم البند الجديد...">
+                    <button class="btn-sap btn-emphasized" onclick="addDefinition()">إضافة</button>
+                </div>
+                <div id="defModalList"
+                    style="max-height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 4px;">
+                    <!-- Items will be here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Datalists -->
+    <datalist id="expensesList"></datalist>
+    <datalist id="paymentsList"></datalist>
+    <datalist id="transfersList"></datalist>
+    <datalist id="depositsList"></datalist>
     <div id="branchModalOverlay"
         style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;">
         <div class="sap-card" style="width: 400px; max-width: 90%; margin: 0;">
@@ -700,6 +1072,7 @@
     <script src="js/pages/pos-reconciliation.js"></script>
     <script src="js/pages/print-reports.js"></script>
     <script src="js/pages/settings.js"></script>
+    <script src="js/pages/treasury-reconciliation.js"></script>
 
     <script>
         // Router Logic
@@ -734,6 +1107,8 @@
                 if (typeof renderBranchesTable === 'function') renderBranchesTable();
             } else if (pageId === 'reconciliation') {
                 if (typeof initRecPage === 'function') initRecPage();
+            } else if (pageId === 'treasury') {
+                if (typeof initTreasuryPage === 'function') initTreasuryPage();
             }
         }
 
@@ -780,6 +1155,9 @@
             Designed by Khaled Rizk 0538611816
         </div>
     </div>
+
+    <!-- Print Area -->
+    <div id="treasuryPrintArea" style="display: none;"></div>
 
 </body>
 
