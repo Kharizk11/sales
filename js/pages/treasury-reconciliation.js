@@ -155,11 +155,69 @@ async function loadTreasuryDataForDate(date) {
         const daysPosRecs = allPosRecs.filter(r => r.date === date);
 
         const totalPosSales = daysPosRecs.reduce((sum, r) => sum + (parseFloat(r.totalSales) || 0), 0);
-        const totalPosNetwork = daysPosRecs.reduce((sum, r) => sum + (parseFloat(r.networkSales) || 0), 0);
+        const totalPosMada = daysPosRecs.reduce((sum, r) => sum + (parseFloat(r.madaSales) || 0), 0);
+        const totalPosVisa = daysPosRecs.reduce((sum, r) => sum + (parseFloat(r.visaSales) || 0), 0);
+        const totalPosNetwork = totalPosMada + totalPosVisa;
 
-        // 3. Populate UI
-        document.getElementById('trPosSales').textContent = formatMoney(totalPosSales);
-        document.getElementById('trPosNetwork').textContent = formatMoney(totalPosNetwork);
+        // 3. Render POS Sales Table
+        const salesTableHtml = `
+            <table class="sap-table" style="margin: 0; border: 1px solid #eee;">
+                <thead>
+                    <tr style="background: #f8f9fa;">
+                        <th>نقطة البيع</th>
+                        <th style="text-align: left;">المبلغ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${daysPosRecs.map(r => `
+                        <tr>
+                            <td>${r.posName}</td>
+                            <td style="text-align: left;">${formatMoney(r.totalSales)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold; background: #f0f7ff;">
+                        <td>الإجمالي</td>
+                        <td style="text-align: left;" id="trPosSales">${formatMoney(totalPosSales)}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        `;
+        document.getElementById('trPosSalesTableContainer').innerHTML = salesTableHtml;
+
+        // 4. Render POS Network Table
+        const networkTableHtml = `
+            <table class="sap-table" style="margin: 0; border: 1px solid #eee;">
+                <thead>
+                    <tr style="background: #f8f9fa;">
+                        <th>نقطة البيع</th>
+                        <th style="text-align: left;">مدى</th>
+                        <th style="text-align: left;">فيزا</th>
+                        <th style="text-align: left;">الإجمالي</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${daysPosRecs.map(r => `
+                        <tr>
+                            <td>${r.posName}</td>
+                            <td style="text-align: left;">${formatMoney(r.madaSales || 0)}</td>
+                            <td style="text-align: left;">${formatMoney(r.visaSales || 0)}</td>
+                            <td style="text-align: left;">${formatMoney(r.networkSales)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold; background: #fff3e0;">
+                        <td>الإجمالي</td>
+                        <td style="text-align: left;" id="trPosMada">${formatMoney(totalPosMada)}</td>
+                        <td style="text-align: left;" id="trPosVisa">${formatMoney(totalPosVisa)}</td>
+                        <td style="text-align: left;" id="trPosNetwork">${formatMoney(totalPosNetwork)}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        `;
+        document.getElementById('trPosNetworkTableContainer').innerHTML = networkTableHtml;
 
         if (currentTreasuryRec) {
             // Load existing data
@@ -214,18 +272,49 @@ function renderDynamicTable(type, data) {
     tbody.innerHTML = '';
     tableData[type].forEach((item, index) => {
         const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><input type="text" class="sap-input" value="${item.description}" list="${type}List" onchange="updateTableItem('${type}', ${index}, 'description', this.value)"></td>
-            <td><input type="number" class="sap-input" value="${item.amount}" step="0.01" onchange="updateTableItem('${type}', ${index}, 'amount', this.value)"></td>
-            <td><button class="btn-sap btn-transparent" onclick="removeTableItem('${type}', ${index})" style="color: var(--sap-error);">🗑️</button></td>
-        `;
-        tbody.innerHTML += row.outerHTML;
+        if (type === 'expenses') {
+            row.innerHTML = `
+                <td><input type="text" class="sap-input" value="${item.description || ''}" list="${type}List" onchange="updateTableItem('${type}', ${index}, 'description', this.value)"></td>
+                <td><input type="text" class="sap-input" value="${item.statement || ''}" placeholder="بيان البند..." onchange="updateTableItem('${type}', ${index}, 'statement', this.value)"></td>
+                <td><input type="number" class="sap-input" value="${item.amount || 0}" step="0.01" onchange="updateTableItem('${type}', ${index}, 'amount', this.value)"></td>
+                <td><button class="btn-sap btn-transparent" onclick="removeTableItem('${type}', ${index})" style="color: var(--sap-error);">🗑️</button></td>
+            `;
+        } else {
+            row.innerHTML = `
+                <td><input type="text" class="sap-input" value="${item.description || ''}" list="${type}List" onchange="updateTableItem('${type}', ${index}, 'description', this.value)"></td>
+                <td><input type="number" class="sap-input" value="${item.amount || 0}" step="0.01" onchange="updateTableItem('${type}', ${index}, 'amount', this.value)"></td>
+                <td><button class="btn-sap btn-transparent" onclick="removeTableItem('${type}', ${index})" style="color: var(--sap-error);">🗑️</button></td>
+            `;
+        }
+        tbody.appendChild(row);
     });
+
+    // Add Subtotal row
+    const subtotal = tableData[type].reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+    const subtotalRow = document.createElement('tr');
+    subtotalRow.style.fontWeight = 'bold';
+    subtotalRow.style.background = 'var(--sap-bg-secondary)';
+
+    if (type === 'expenses') {
+        subtotalRow.innerHTML = `
+            <td colspan="2" style="text-align: left; padding-left: 20px;">إجمالي القسم:</td>
+            <td style="color: var(--sap-text-primary);">${formatMoney(subtotal)}</td>
+            <td></td>
+        `;
+    } else {
+        subtotalRow.innerHTML = `
+            <td style="text-align: left; padding-left: 20px;">إجمالي القسم:</td>
+            <td style="color: var(--sap-text-primary);">${formatMoney(subtotal)}</td>
+            <td></td>
+        `;
+    }
+    tbody.appendChild(subtotalRow);
 
     // Add "Add New" row
     const addRow = document.createElement('tr');
+    const colSpan = type === 'expenses' ? 4 : 3;
     addRow.innerHTML = `
-        <td colspan="3" style="text-align: center;">
+        <td colspan="${colSpan}" style="text-align: center;">
             <button class="btn-sap btn-standard" onclick="addTableItem('${type}')" style="width: 100%;">+ إضافة بند</button>
         </td>
     `;
@@ -235,7 +324,9 @@ function renderDynamicTable(type, data) {
 }
 
 function addTableItem(type) {
-    tableData[type].push({ description: '', amount: 0 });
+    const newItem = { description: '', amount: 0 };
+    if (type === 'expenses') newItem.statement = '';
+    tableData[type].push(newItem);
     renderDynamicTable(type, tableData[type]);
 }
 
@@ -275,16 +366,24 @@ function calculateTreasury() {
     // Net Daily Cash = (POS Sales - Returns + Cash Deposits) - (Network Sales + Expenses + Payments + Bank Transfers)
     // Note: POS Sales includes Network, so we subtract Network to get Cash Sales.
 
-    const totalInflow = posSales + sumDeposits;
-    const totalOutflow = returns + posNetwork + sumExpenses + sumPayments + sumTransfers;
+    const totalReceipts = openingBalance + posSales + returns;
+    const totalNonCash = posNetwork + sumTransfers;
+    const totalOutflows = sumExpenses + sumPayments + sumDeposits;
 
-    const netDailyCash = totalInflow - totalOutflow;
-    const bookBalance = openingBalance + netDailyCash;
+    const netDailyCash = totalReceipts - totalNonCash - totalOutflows;
+    const bookBalance = openingBalance + (posSales + sumDeposits) - (returns + posNetwork + sumExpenses + sumPayments + sumTransfers);
+    // Note: The above bookBalance calculation is more explicit to match the logic:
+    // Net Daily Cash = (POS Sales + Cash Deposits) - (Returns + Network + Expenses + Payments + Transfers)
+    // But the user wants specific section totals displayed.
 
     const actualCash = parseFloat(document.getElementById('trActualCash').value) || 0;
     const difference = actualCash - bookBalance;
 
     // Update UI
+    document.getElementById('trTotalReceipts').textContent = formatMoney(totalReceipts);
+    document.getElementById('trTotalNonCash').textContent = formatMoney(totalNonCash);
+    document.getElementById('trTotalOutflows').textContent = formatMoney(totalOutflows);
+
     document.getElementById('trNetCash').textContent = formatMoney(netDailyCash);
     document.getElementById('trBookBalance').textContent = formatMoney(bookBalance);
     document.getElementById('trDifference').textContent = formatMoney(difference);
@@ -427,7 +526,7 @@ function filterTreasuryReports() {
                 results.push({
                     date: rec.date,
                     type: typeLabel,
-                    description: item.description,
+                    description: item.description + (item.statement ? ` - ${item.statement}` : ''),
                     amount: item.amount,
                     notes: rec.notes || ''
                 });
@@ -548,8 +647,8 @@ function printTreasuryReconciliation() {
 
             <!-- 2. Non-Cash Deductions -->
             ${sectionHeader('2. تسويات العمليات غير النقدية (خصم)')}
-            ${row('(-) إجمالي مبيعات بطاقات الصرف (شبكات)', posNetwork, false, true)}
-            ${row('(-) حوالات عملاء مباشرة للبنك', sumTransfers, false, true)}
+            ${row('(-) مبيعات مدى', parseFloat(document.getElementById('trPosMada').textContent.replace(/[^0-9.-]+/g, "")) || 0, false, true)}
+            ${row('(-) مبيعات فيزا', parseFloat(document.getElementById('trPosVisa').textContent.replace(/[^0-9.-]+/g, "")) || 0, false, true)}
             <div style="border-top: 1px solid #ccc; margin: 5px 0;"></div>
             ${row('إجمالي الخصومات غير النقدية', totalNonCash, true, true)}
 
@@ -562,7 +661,7 @@ function printTreasuryReconciliation() {
             ${sectionHeader('المصروفات والمدفوعات النقدية')}
             
             <!-- Expenses List -->
-            ${tableData.expenses.map(item => row(`- مصروفات نثرية: ${item.description}`, item.amount)).join('')}
+            ${tableData.expenses.map(item => row(`- مصروفات: ${item.description}${item.statement ? ' (' + item.statement + ')' : ''}`, item.amount)).join('')}
             
             <!-- Payments List -->
             ${tableData.payments.map(item => row(`- سداد مورد: ${item.description}`, item.amount)).join('')}

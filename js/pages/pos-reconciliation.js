@@ -319,13 +319,27 @@ function calculateRec() {
     document.getElementById('resNetSales').textContent = formatMoney(netSales);
     document.getElementById('resDifference').textContent = formatMoney(difference);
 
+    const diffCard = document.getElementById('diffCard');
     const diffEl = document.getElementById('resDifference');
+
     if (difference > 0) {
         diffEl.style.color = 'var(--sap-success)';
+        if (diffCard) {
+            diffCard.style.background = '#e8f5e9';
+            diffCard.style.borderColor = '#c8e6c9';
+        }
     } else if (difference < 0) {
         diffEl.style.color = 'var(--sap-error)';
+        if (diffCard) {
+            diffCard.style.background = '#ffebee';
+            diffCard.style.borderColor = '#ffcdd2';
+        }
     } else {
         diffEl.style.color = 'inherit';
+        if (diffCard) {
+            diffCard.style.background = '#f8f9fa';
+            diffCard.style.borderColor = '#eee';
+        }
     }
 }
 
@@ -402,24 +416,37 @@ function renderRecTable() {
 
     sorted.forEach(rec => {
         const row = document.createElement('tr');
+        let statusBadge = '';
         let diffColor = 'inherit';
-        if (rec.type === 'surplus') diffColor = 'var(--sap-success)';
-        else if (rec.type === 'deficit') diffColor = 'var(--sap-error)';
+
+        if (rec.type === 'surplus') {
+            statusBadge = `<span style="background: #e8f5e9; color: #2e7d32; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">زيادة (${formatMoney(rec.difference)})</span>`;
+            diffColor = 'var(--sap-success)';
+        } else if (rec.type === 'deficit') {
+            statusBadge = `<span style="background: #ffebee; color: #c62828; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">عجز (${formatMoney(rec.difference)})</span>`;
+            diffColor = 'var(--sap-error)';
+        } else {
+            statusBadge = `<span style="background: #e3f2fd; color: #1565c0; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">مطابق</span>`;
+        }
 
         row.innerHTML = `
             <td>${rec.date}</td>
-            <td>${rec.posName}</td>
+            <td style="font-weight: 500;">${rec.posName}</td>
             <td>${rec.cashier}</td>
-            <td>${formatMoney(rec.netSales)}</td>
+            <td>${formatMoney(rec.madaSales || 0)}</td>
+            <td>${formatMoney(rec.visaSales || 0)}</td>
+            <td style="font-weight: bold; color: var(--sap-primary);">${formatMoney(rec.netSales)}</td>
             <td>${formatMoney(rec.cashHandedOver)}</td>
-            <td style="font-weight: bold; color: ${diffColor}">${formatMoney(rec.difference)}</td>
+            <td>${statusBadge}</td>
             <td>
-                <button class="btn-sap btn-transparent" onclick="showReconciliationForm('${rec.id}')">✏️</button>
-                <button class="btn-sap btn-transparent" onclick="printSingleRec('${rec.id}')">🖨️</button>
-                <button class="btn-sap btn-transparent" onclick="deleteRec('${rec.id}')" style="color: var(--sap-error);">🗑️</button>
+                <div style="display: flex; gap: 5px;">
+                    <button class="btn-sap btn-transparent" onclick="showReconciliationForm('${rec.id}')" title="تعديل">✏️</button>
+                    <button class="btn-sap btn-transparent" onclick="printSingleRec('${rec.id}')" title="طباعة">🖨️</button>
+                    <button class="btn-sap btn-transparent" onclick="deleteRec('${rec.id}')" style="color: var(--sap-error);" title="حذف">🗑️</button>
+                </div>
             </td>
         `;
-        tbody.innerHTML += row.outerHTML;
+        tbody.appendChild(row);
     });
 }
 
